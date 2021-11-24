@@ -47,9 +47,10 @@
   ******************************************************************************
   */
 
-
 /* Includes ------------------------------------------------------------------*/
-#include "stm32_it.h"
+#include "hw_config.h"
+#include "usb_lib.h"
+#include "usb_istr.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -57,7 +58,6 @@
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
-
 /******************************************************************************/
 /*            Cortex-M Processor Exceptions Handlers                         */
 /******************************************************************************/
@@ -175,6 +175,44 @@ void PendSV_Handler(void)
 *******************************************************************************/
 void SysTick_Handler(void)
 {
+}
+
+/*******************************************************************************
+* Function Name  : USB_HP_CAN1_TX_IRQHandler
+* Description    : This function handles USB High Priority or CAN TX interrupts requests
+*                  requests.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void USB_HP_CAN_TX_IRQHandler(void)
+{
+  CTR_HP();
+}
+
+/*******************************************************************************
+* Function Name  : USB_IRQHandler
+* Description    : This function handles USB Low Priority interrupts
+*                  requests.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void USB_LP_CAN_RX0_IRQHandler(void)
+{
+  USB_Istr();
+}
+
+/*******************************************************************************
+* Function Name  : USB_FS_WKUP_IRQHandler
+* Description    : This function handles USB WakeUp interrupt request.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void USBWakeUp_IRQHandler(void)
+{
+  EXTI_ClearITPendingBit(EXTI_Line18);
 }
 
 /******************************************************************************/

@@ -3,6 +3,8 @@
 #include "stm32f10x_rcc.h"
 #include "generic.h"
 #include "device.h"
+#include "hw_config.h"
+#include "usb_init.h"
 
 int main()
 {
@@ -13,8 +15,13 @@ int main()
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
-
+/****/
+	Set_System();
+	Set_USBClock();
 	DWT_Delay_Init();
+	USB_Interrupts_Config(ENABLE);
+	USB_Init();
+/****/
 
 	while (1)
 	{
