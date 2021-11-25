@@ -21,6 +21,12 @@
 #define ETH_MIN_PACKET_SIZE         60
 #define RNDIS_RX_BUFFER_SIZE        (ETH_MAX_PACKET_SIZE + sizeof(rndis_data_packet_t))
 
+//todo clean this
+extern uint8_t received[RNDIS_MTU + 14];
+extern int recvSize;
+
+typedef void (*rndis_rxproc_t)(const char *data, int size);
+
 extern const uint32_t OIDSupportedList[22];
 #define OID_LIST_LENGTH (sizeof(OIDSupportedList) / sizeof(*OIDSupportedList))
 #define ENC_BUF_SIZE    (OID_LIST_LENGTH * 4 + 32)
@@ -43,5 +49,7 @@ void rndis_query_cmplt32(int status, uint32_t data);
 void rndis_query();
 void rndis_handle_set_msg();
 void usbd_cdc_transfer();
+uint8_t rndis_can_send(void);
+uint8_t rndis_send(const void *data, int size);
 
 #endif /* USB_RNDIS_RNDIS_H_ */

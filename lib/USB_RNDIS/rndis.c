@@ -50,9 +50,17 @@ uint8_t encapsulated_buffer[ENC_BUF_SIZE];
 char rndis_rx_buffer[RNDIS_RX_BUFFER_SIZE];
 uint8_t usb_rx_buffer[CDC_DATA_SIZE];
 
-typedef void (*rndis_rxproc_t)(const char *data, int size);
-rndis_rxproc_t rndis_rxproc = NULL;
+//todo clean
+uint8_t received[RNDIS_MTU + 14];
+int recvSize = 0;
+void on_packet(const char *data, int size)
+{
+    memcpy(received, data, size);
+    recvSize = size;
+}
+//
 
+rndis_rxproc_t rndis_rxproc = on_packet;
 uint8_t *rndis_tx_ptr = NULL;
 uint8_t rndis_first_tx = 1;
 int rndis_tx_size = 0;
@@ -242,4 +250,25 @@ void handle_packet(const char *data, int size)
 	usb_eth_stat.rxok++;
 	if (rndis_rxproc != NULL)
 		rndis_rxproc(&rndis_rx_buffer[p->DataOffset + offsetof(rndis_data_packet_t, DataOffset)], p->DataLength);
+}
+
+uint8_t rndis_can_send(void)
+{
+	return rndis_tx_size <= 0;
+}
+
+uint8_t rndis_send(const void *data, int size)
+{
+	if (size <= 0 ||
+		size > ETH_MAX_PACKET_SIZE ||
+		rndis_tx_size > 0) return 0;
+
+	__disable_irq();
+	rndis_first_tx = 1;
+	rndis_tx_ptr = (uint8_t *)data;
+	rndis_tx_size = size;
+	rndis_sended = 0;
+	__enable_irq();
+
+	return 1;
 }

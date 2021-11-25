@@ -5,6 +5,7 @@
 #include "device.h"
 #include "hw_config.h"
 #include "usb_init.h"
+#include "netconf.h"
 
 int main()
 {
@@ -22,10 +23,17 @@ int main()
 	USB_Interrupts_Config(ENABLE);
 	USB_Init();
 /****/
+	LwIP_Init();
 
+	uint32_t LocalTime = 0;
 	while (1)
 	{
-		GPIO_ToggleBits(GPIOC, PIN_LED);
-		DWT_Delay_ms(500);
+		LwIP_Pkt_Handle();
+		LwIP_Periodic_Handle(LocalTime);
+		LocalTime += 10;
+
+		if(LocalTime % 500 == 0)
+			GPIO_ToggleBits(GPIOC, PIN_LED);
+		DWT_Delay_ms(10);
 	}
 }
