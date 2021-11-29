@@ -23,13 +23,13 @@ int main()
 	USB_Interrupts_Config(ENABLE);
 	USB_Init();
 /****/
-	LwIP_Init();
+//	LwIP_Init();
 
 	uint32_t LocalTime = 0;
 	while (1)
 	{
-		LwIP_Pkt_Handle();
-		LwIP_Periodic_Handle(LocalTime);
+//		LwIP_Pkt_Handle();
+//		LwIP_Periodic_Handle(LocalTime);
 		LocalTime += 10;
 
 		if(LocalTime % 500 == 0)

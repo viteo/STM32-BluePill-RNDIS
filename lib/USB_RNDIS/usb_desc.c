@@ -139,7 +139,7 @@ const uint8_t RNDIS_ConfigDescriptor[] =
 		/*Endpoint OUT Descriptor*/
 		0x07,   /* bLength: Endpoint Descriptor size */
 		USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
-		CDC_DAT_OUT_EP,   /* bEndpointAddress (OUT3)*/
+		CDC_DAT_OUT_EP,   /* bEndpointAddress (OUT2)*/
 		0x02,   /* bmAttributes: Bulk */
 		CDC_DATA_SIZE,   /* wMaxPacketSize: */
 		0x00,
@@ -147,7 +147,7 @@ const uint8_t RNDIS_ConfigDescriptor[] =
 		/*Endpoint IN Descriptor*/
 		0x07,   /* bLength: Endpoint Descriptor size */
 		USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
-		CDC_DAT_IN_EP,   /* bEndpointAddress: (IN3) */
+		CDC_DAT_IN_EP,   /* bEndpointAddress: (IN2) */
 		0x02,   /* bmAttributes: Bulk */
 		CDC_DATA_SIZE,             /* wMaxPacketSize: */
 		0x00,

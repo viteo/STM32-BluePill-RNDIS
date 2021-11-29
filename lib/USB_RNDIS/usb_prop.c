@@ -316,7 +316,7 @@ void RNDIS_Status_Out(void)
 
 uint8_t* RNDIS_CopyData(uint16_t Length)
 {
-	if (Length == 0)
+	if (Length == 0) //todo no need for this check?
 	{
 		pInformation->Ctrl_Info.Usb_wLength = 8;
 		return NULL;
@@ -329,44 +329,33 @@ uint8_t* RNDIS_CopyData(uint16_t Length)
 
 RESULT RNDIS_Data_Setup(uint8_t RequestNo)
 {
-	uint8_t* (*CopyRoutine)(uint16_t);
-	CopyRoutine = NULL;
-
 	switch(pInformation->USBbmRequestType & REQUEST_TYPE)
 	{
 	case CLASS_REQUEST:
 		if (pInformation->USBwLength != 0) /* is data setup packet? */
 		{
+			/* Check if the request is Device-to-Host */
 			if(pInformation->USBbmRequestType & 0x80)
 			{
-				NOP_Process();
 				//USBD_CtlSendData(pdev, encapsulated_buffer, ((rndis_generic_msg_t *)encapsulated_buffer)->MessageLength);
-//				CopyRoutine = RNDIS_CopyData;
 				pInformation->Ctrl_Info.Usb_wLength = ((rndis_generic_msg_t *)encapsulated_buffer)->MessageLength;
 				pInformation->Ctrl_Info.Usb_wOffset = 0;
 				pInformation->Ctrl_Info.CopyData = RNDIS_CopyData;
 				return USB_SUCCESS;
 			}
-			else
+			else /* Host-to-Device requeset */
 			{
-				CopyRoutine = RNDIS_CopyData;
+				pInformation->Ctrl_Info.Usb_rLength = pInformation->USBwLength;
+				pInformation->Ctrl_Info.Usb_rOffset = 0;
+				pInformation->Ctrl_Info.CopyData = RNDIS_CopyData;
+				return USB_SUCCESS;
 			}
 		}
 		break;
 	default:
 		return USB_UNSUPPORT;
 	}
-
-
-	if (CopyRoutine == NULL)
-	{
-		return USB_UNSUPPORT;
-	}
-
-	pInformation->Ctrl_Info.CopyData = CopyRoutine;
-	pInformation->Ctrl_Info.Usb_wOffset = 0;
-	(*CopyRoutine)(0);
-	return USB_SUCCESS;
+	return USB_UNSUPPORT;
 }
 
 /*******************************************************************************

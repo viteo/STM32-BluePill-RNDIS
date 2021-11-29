@@ -49,12 +49,6 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-uint8_t USB_Rx_Buffer[CDC_DATA_SIZE];
-extern  uint8_t USART_Rx_Buffer[];
-extern uint32_t USART_Rx_ptr_out;
-extern uint32_t USART_Rx_length;
-extern uint8_t  USB_Tx_State;
-
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -67,7 +61,7 @@ extern uint8_t  USB_Tx_State;
 *******************************************************************************/
 void EP1_IN_Callback (void)
 {
-
+	//todo empty?
 }
 
 /*******************************************************************************
@@ -135,21 +129,7 @@ void EP2_OUT_Callback(void)
 *******************************************************************************/
 void SOF_Callback(void)
 {
-//#define VCOMPORT_IN_FRAME_INTERVAL             5
-//
-//    static uint32_t FrameCount = 0;
-//
-//  if(bDeviceState == CONFIGURED)
-//  {
-//    if (FrameCount++ == VCOMPORT_IN_FRAME_INTERVAL)
-//    {
-//      /* Reset the frame counter */
-//      FrameCount = 0;
-//
-//      /* Check the data to be sent through IN pipe */
-//      Handle_USBAsynchXfer();
-//    }
-//  }
+	usbd_cdc_transfer();
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 
