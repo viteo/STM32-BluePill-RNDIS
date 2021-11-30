@@ -136,14 +136,6 @@ const uint8_t RNDIS_ConfigDescriptor[] =
 		0x00,   /* bInterfaceSubClass: */
 		0x00,   /* bInterfaceProtocol: */
 		0x00,   /* iInterface: */
-		/*Endpoint OUT Descriptor*/
-		0x07,   /* bLength: Endpoint Descriptor size */
-		USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
-		CDC_DAT_OUT_EP,   /* bEndpointAddress (OUT2)*/
-		0x02,   /* bmAttributes: Bulk */
-		CDC_DATA_SIZE,   /* wMaxPacketSize: */
-		0x00,
-		0x00,   /* bInterval: ignore for Bulk transfer */
 		/*Endpoint IN Descriptor*/
 		0x07,   /* bLength: Endpoint Descriptor size */
 		USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
@@ -151,7 +143,15 @@ const uint8_t RNDIS_ConfigDescriptor[] =
 		0x02,   /* bmAttributes: Bulk */
 		CDC_DATA_SIZE,             /* wMaxPacketSize: */
 		0x00,
-		0x00    /* bLength: Endpoint Descriptor size */
+		0x00,   /* bInterval: ignore for Bulk transfer */
+		/*Endpoint OUT Descriptor*/
+		0x07,   /* bLength: Endpoint Descriptor size */
+		USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
+		CDC_DAT_OUT_EP,   /* bEndpointAddress (OUT3)*/
+		0x02,   /* bmAttributes: Bulk */
+		CDC_DATA_SIZE,   /* wMaxPacketSize: */
+		0x00,
+		0x00    /* bInterval: ignore for Bulk transfer */
 };
 
 /* USB String Descriptors */

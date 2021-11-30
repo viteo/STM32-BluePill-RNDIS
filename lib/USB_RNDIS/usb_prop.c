@@ -174,16 +174,20 @@ void RNDIS_Reset(void)
 	/* Initialize CDC Endpoints */
 	SetEPType(CDC_CMD_EP_IDX, EP_INTERRUPT);
 	SetEPTxAddr(CDC_CMD_EP_IDX, ENDP1_CMDADDR);
-	SetEPRxStatus(CDC_CMD_EP_IDX, EP_RX_DIS);
 	SetEPTxStatus(CDC_CMD_EP_IDX, EP_TX_NAK);
+	SetEPRxStatus(CDC_CMD_EP_IDX, EP_RX_DIS);
 
-	SetEPType(CDC_DAT_EP_IDX, EP_BULK);
-	SetEPTxAddr(CDC_DAT_EP_IDX, ENDP2_TXADDR);
-	SetEPTxStatus(CDC_DAT_EP_IDX, EP_TX_NAK);
+	SetEPType(CDC_DAT_EP_IN_IDX, EP_BULK);
+	SetEPTxAddr(CDC_DAT_EP_IN_IDX, ENDP2_TXADDR);
+	SetEPTxStatus(CDC_DAT_EP_IN_IDX, EP_TX_NAK);
+	SetEPRxStatus(CDC_DAT_EP_IN_IDX, EP_RX_DIS);
 
-	SetEPRxAddr(CDC_DAT_EP_IDX, ENDP2_RXADDR);
-	SetEPRxCount(CDC_DAT_EP_IDX, CDC_DATA_SIZE);
-	SetEPRxStatus(CDC_DAT_EP_IDX, EP_RX_VALID);
+	SetEPType(CDC_DAT_EP_OUT_IDX, EP_BULK);
+	SetEPRxAddr(CDC_DAT_EP_OUT_IDX, ENDP3_RXADDR);
+	SetEPRxStatus(CDC_DAT_EP_OUT_IDX, EP_RX_VALID);
+	SetEPTxStatus(CDC_DAT_EP_OUT_IDX, EP_TX_DIS);
+	SetEPRxCount(CDC_DAT_EP_OUT_IDX, CDC_DATA_SIZE);
+	SetEPRxValid(CDC_DAT_EP_OUT_IDX);
 
 	/* Set this device to response on default address */
 	SetDeviceAddress(0);
@@ -202,8 +206,8 @@ void RNDIS_SetConfiguration(void)
 {
 	if (pInformation->Current_Configuration != 0)
 	{
-		ClearDTOG_RX(CDC_DAT_EP_IDX);
-		ClearDTOG_TX(CDC_DAT_EP_IDX);
+		ClearDTOG_RX(CDC_DAT_EP_OUT_IDX);
+		ClearDTOG_TX(CDC_DAT_EP_IN_IDX);
 		/* Device configured */
 		bDeviceState = CONFIGURED;
 	}
@@ -331,6 +335,7 @@ uint8_t* RNDIS_CopyData(uint16_t Length)
 	}
 }
 
+
 RESULT RNDIS_Data_Setup(uint8_t RequestNo)
 {
 	switch(pInformation->USBbmRequestType & REQUEST_TYPE)
@@ -349,6 +354,7 @@ RESULT RNDIS_Data_Setup(uint8_t RequestNo)
 			}
 			else /* Host-to-Device requeset */
 			{
+				//USBD_CtlPrepareRx(pdev, encapsulated_buffer, req->wLength);
 				pInformation->Ctrl_Info.Usb_rLength = pInformation->USBwLength;
 				pInformation->Ctrl_Info.Usb_rOffset = 0;
 				pInformation->Ctrl_Info.CopyData = RNDIS_CopyData;
@@ -356,6 +362,12 @@ RESULT RNDIS_Data_Setup(uint8_t RequestNo)
 			}
 		}
 		break;
+/*
+	case STANDARD_REQUEST:
+#define USB_DEVICE_QUALIFIER_DESCRIPTOR 6
+		if(RequestNo == USB_DEVICE_QUALIFIER_DESCRIPTOR)
+			return USB_SUCCESS;
+*/
 	default:
 		return USB_UNSUPPORT;
 	}

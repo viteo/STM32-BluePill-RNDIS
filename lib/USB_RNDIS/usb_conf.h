@@ -64,18 +64,19 @@
 
 // endpoints numbers
 #define CDC_CMD_EP_IDX                  0x01
-#define CDC_DAT_EP_IDX                  0x02
+#define CDC_DAT_EP_IN_IDX               0x02
+#define CDC_DAT_EP_OUT_IDX              0x03
 
-#define CDC_CMD_EP                      (CDC_CMD_EP_IDX | IN_EP_DIR)   /* EP1 for CDC commands */
-#define CDC_DAT_OUT_EP                  CDC_DAT_EP_IDX                 /* EP2 for data OUT */
-#define CDC_DAT_IN_EP                   (CDC_DAT_EP_IDX | IN_EP_DIR)   /* EP2 for data IN */
+#define CDC_CMD_EP                      (CDC_CMD_EP_IDX | IN_EP_DIR)    /* EP1 for CDC commands */
+#define CDC_DAT_IN_EP                   (CDC_DAT_EP_IN_IDX | IN_EP_DIR) /* EP2 for data IN */
+#define CDC_DAT_OUT_EP                  (CDC_DAT_EP_OUT_IDX)            /* EP3 for data OUT */
 
 /*-------------------------------------------------------------*/
 /* EP_NUM */
 /* defines how many endpoints are used by the device */
 /*-------------------------------------------------------------*/
 
-#define EP_NUM               (3) //counting EP0..EP2
+#define EP_NUM               (4) //counting EP0..EP3
 
 /*-------------------------------------------------------------*/
 /* --------------   Buffer Description Table  -----------------*/
@@ -89,11 +90,11 @@
 #define ENDP0_RXADDR        (0x20)
 #define ENDP0_TXADDR        (0x60)
 
-/* CDC EP1 EP2 */
+/* CDC EP1 EP2 EP3 */
 /* cmd/in/out buffer base address */
 #define ENDP1_CMDADDR       (0xA0)
-#define ENDP2_RXADDR        (0xE0)
-#define ENDP2_TXADDR        (0x100)
+#define ENDP2_TXADDR        (0xE0)
+#define ENDP3_RXADDR        (0x120)
 
 /*-------------------------------------------------------------*/
 /* -------------------   ISTR events  -------------------------*/
@@ -123,8 +124,8 @@
 #define  EP7_IN_Callback   NOP_Process
 
 #define  EP1_OUT_Callback   NOP_Process
-//#define  EP2_OUT_Callback   NOP_Process
-#define  EP3_OUT_Callback   NOP_Process
+#define  EP2_OUT_Callback   NOP_Process
+//#define  EP3_OUT_Callback   NOP_Process
 #define  EP4_OUT_Callback   NOP_Process
 #define  EP5_OUT_Callback   NOP_Process
 #define  EP6_OUT_Callback   NOP_Process
