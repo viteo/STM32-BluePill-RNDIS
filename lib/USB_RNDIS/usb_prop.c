@@ -180,9 +180,10 @@ void RNDIS_Reset(void)
 	SetEPType(CDC_DAT_EP_IDX, EP_BULK);
 	SetEPTxAddr(CDC_DAT_EP_IDX, ENDP2_TXADDR);
 	SetEPTxStatus(CDC_DAT_EP_IDX, EP_TX_NAK);
+
 	SetEPRxAddr(CDC_DAT_EP_IDX, ENDP2_RXADDR);
-	SetEPRxStatus(CDC_DAT_EP_IDX, EP_RX_VALID);
 	SetEPRxCount(CDC_DAT_EP_IDX, CDC_DATA_SIZE);
+	SetEPRxStatus(CDC_DAT_EP_IDX, EP_RX_VALID);
 
 	/* Set this device to response on default address */
 	SetDeviceAddress(0);
@@ -199,10 +200,10 @@ void RNDIS_Reset(void)
 *******************************************************************************/
 void RNDIS_SetConfiguration(void)
 {
-	DEVICE_INFO *pInfo = &Device_Info;
-
-	if (pInfo->Current_Configuration != 0)
+	if (pInformation->Current_Configuration != 0)
 	{
+		ClearDTOG_RX(CDC_DAT_EP_IDX);
+		ClearDTOG_TX(CDC_DAT_EP_IDX);
 		/* Device configured */
 		bDeviceState = CONFIGURED;
 	}
@@ -249,7 +250,8 @@ void RNDIS_Status_In(void)
 		m->AfListOffset = 0;
 		m->AfListSize = 0;
 		rndis_state = rndis_initialized;
-		USB_SIL_Write(CDC_CMD_EP_IDX, (uint8_t*) "\x01\x00\x00\x00\x00\x00\x00\x00", 8);
+		USB_SIL_Write(CDC_CMD_EP, (uint8_t*) "\x01\x00\x00\x00\x00\x00\x00\x00", 8);
+		SetEPTxCount(CDC_CMD_EP_IDX, 8);
 		SetEPTxValid(CDC_CMD_EP_IDX);
 	}
 		break;
@@ -272,7 +274,8 @@ void RNDIS_Status_In(void)
 		m->Status = RNDIS_STATUS_SUCCESS;
 		m->AddressingReset = 1; /* Make it look like we did something */
 		/* m->AddressingReset = 0; - Windows halts if set to 1 for some reason */
-		USB_SIL_Write(CDC_CMD_EP_IDX, (uint8_t*) "\x01\x00\x00\x00\x00\x00\x00\x00", 8);
+		USB_SIL_Write(CDC_CMD_EP, (uint8_t*) "\x01\x00\x00\x00\x00\x00\x00\x00", 8);
+		SetEPTxCount(CDC_CMD_EP_IDX, 8);
 		SetEPTxValid(CDC_CMD_EP_IDX);
 	}
 		break;
@@ -286,7 +289,8 @@ void RNDIS_Status_In(void)
 		m->Status = RNDIS_STATUS_SUCCESS;
 	}
 		/* We have data to send back */
-		USB_SIL_Write(CDC_CMD_EP_IDX, (uint8_t*) "\x01\x00\x00\x00\x00\x00\x00\x00", 8);
+		USB_SIL_Write(CDC_CMD_EP, (uint8_t*) "\x01\x00\x00\x00\x00\x00\x00\x00", 8);
+		SetEPTxCount(CDC_CMD_EP_IDX, 8);
 		SetEPTxValid(CDC_CMD_EP_IDX);
 		break;
 	default:
@@ -316,7 +320,7 @@ void RNDIS_Status_Out(void)
 
 uint8_t* RNDIS_CopyData(uint16_t Length)
 {
-	if (Length == 0) //todo no need for this check?
+	if (Length == 0) //todo no need for this check
 	{
 		pInformation->Ctrl_Info.Usb_wLength = 8;
 		return NULL;

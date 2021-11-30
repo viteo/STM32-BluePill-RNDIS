@@ -78,6 +78,7 @@ void rndis_query_cmplt(int status, const void *data, int size)
 	c->Status = status;
 	memcpy(c + 1, data, size);
 	USB_SIL_Write(CDC_CMD_EP, (uint8_t *)"\x01\x00\x00\x00\x00\x00\x00\x00", 8);
+	SetEPTxCount(CDC_CMD_EP_IDX, 8);
 	SetEPTxValid(CDC_CMD_EP_IDX);
 }
 
@@ -92,6 +93,7 @@ void rndis_query_cmplt32(int status, uint32_t data)
 	c->Status = status;
 	*(uint32_t *)(c + 1) = data;
 	USB_SIL_Write(CDC_CMD_EP, (uint8_t *)"\x01\x00\x00\x00\x00\x00\x00\x00", 8);
+	SetEPTxCount(CDC_CMD_EP_IDX, 8);
 	SetEPTxValid(CDC_CMD_EP_IDX);
 }
 
@@ -197,6 +199,7 @@ void rndis_handle_set_msg()
 
 	/* c->MessageID is same as before */
 	USB_SIL_Write(CDC_CMD_EP, (uint8_t *)"\x01\x00\x00\x00\x00\x00\x00\x00", 8);
+	SetEPTxCount(CDC_CMD_EP_IDX, 8);
 	SetEPTxValid(CDC_CMD_EP_IDX);
 	return;
 }
@@ -223,6 +226,7 @@ void usbd_cdc_transfer()
 		memcpy(first + sizeof(rndis_data_packet_t), rndis_tx_ptr, sended);
 
 		USB_SIL_Write(CDC_DAT_EP_IDX, (uint8_t *)&first, sizeof(rndis_data_packet_t) + sended);
+		SetEPTxCount(CDC_DAT_EP_IDX, sizeof(rndis_data_packet_t) + sended);
 		SetEPTxValid(CDC_DAT_EP_IDX);
 	}
 	else
@@ -230,6 +234,7 @@ void usbd_cdc_transfer()
 		int n = rndis_tx_size;
 		if (n > CDC_DATA_SIZE) n = CDC_DATA_SIZE;
 		USB_SIL_Write(CDC_DAT_EP_IDX, rndis_tx_ptr, n);
+		SetEPTxCount(CDC_DAT_EP_IDX, n);
 		SetEPTxValid(CDC_DAT_EP_IDX);
 		sended = n;
 	}

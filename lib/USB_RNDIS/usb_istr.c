@@ -84,13 +84,10 @@ void (*pEpInt_OUT[7])(void) =
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
-volatile uint32_t isr_entry = 0; //todo remove
-extern uint32_t out_flag;
 void USB_Istr(void)
 {
     uint32_t i=0;
  __IO uint32_t EP[8];
- isr_entry++;
   
   wIstr = _GetISTR();
 
@@ -183,58 +180,13 @@ void USB_Istr(void)
   }
 #endif
   /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
 #if (IMR_MSK & ISTR_ESOF)
   if (wIstr & ISTR_ESOF & wInterrupt_Mask)
   {
     /* clear ESOF flag in ISTR */
     _SetISTR((uint16_t)CLR_ESOF);
-    
-    if ((_GetFNR()&FNR_RXDP)!=0)
-    {
-      /* increment ESOF counter */
-      esof_counter ++;
-      
-      /* test if we enter in ESOF more than 3 times with FSUSP =0 and RXDP =1=>> possible missing SUSP flag*/
-      if ((esof_counter >3)&&((_GetCNTR()&CNTR_FSUSP)==0))
-      {           
-        /* this a sequence to apply a force RESET*/
-      
-        /*Store CNTR value */
-        wCNTR = _GetCNTR(); 
-      
-        /*Store endpoints registers status */
-        for (i=0;i<8;i++) EP[i] = _GetENDPOINT(i);
-      
-        /*apply FRES */
-        wCNTR|=CNTR_FRES;
-        _SetCNTR(wCNTR);
- 
-        /*clear FRES*/
-        wCNTR&=~CNTR_FRES;
-        _SetCNTR(wCNTR);
-      
-        /*poll for RESET flag in ISTR*/
-        while((_GetISTR()&ISTR_RESET) == 0);
-  
-        /* clear RESET flag in ISTR */
-        _SetISTR((uint16_t)CLR_RESET);
-   
-       /*restore Enpoints*/
-        for (i=0;i<8;i++)
-        _SetENDPOINT(i, EP[i]);
-      
-        esof_counter = 0;
-      }
-    }
-    else
-    {
-        esof_counter = 0;
-    }
-    
     /* resume handling timing is made with ESOFs */
     Resume(RESUME_ESOF); /* request without change of the machine state */
-
 #ifdef ESOF_CALLBACK
     ESOF_Callback();
 #endif
