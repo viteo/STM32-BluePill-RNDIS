@@ -43,7 +43,7 @@
 
 #include <string.h>
 #define lwip_itoa(str, bufsize, num) itoa(num, str, 10)
-#define lwip_strnicmp(str1, str2, len) strnicmp(srt1, str2, len)
+#define lwip_strnicmp(str1, str2, len) strnicmp(str1, str2, len)
 #define lwip_stricmp(str1, str2) stricmp(str1, str2)
 #define lwip_strnstr(str1, str2, len) strnstr(str1, str2, len)
 

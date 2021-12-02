@@ -321,7 +321,6 @@ void RNDIS_Status_Out(void)
 * Output         : None.
 * Return         : USB_UNSUPPORT or USB_SUCCESS.
 *******************************************************************************/
-
 uint8_t* RNDIS_CopyData(uint16_t Length)
 {
 	if (Length == 0) //todo no need for this check
@@ -331,10 +330,9 @@ uint8_t* RNDIS_CopyData(uint16_t Length)
 	}
 	else
 	{
-		return encapsulated_buffer;
+		return encapsulated_buffer + pInformation->Ctrl_Info.Usb_wOffset;
 	}
 }
-
 
 RESULT RNDIS_Data_Setup(uint8_t RequestNo)
 {

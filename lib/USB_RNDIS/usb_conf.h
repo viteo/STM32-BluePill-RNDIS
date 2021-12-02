@@ -82,7 +82,6 @@
 /* --------------   Buffer Description Table  -----------------*/
 /*-------------------------------------------------------------*/
 /* buffer table base address */
-/* buffer table base address */
 #define BTABLE_ADDRESS      (0x00)
 
 /* CONTROL EP0 */

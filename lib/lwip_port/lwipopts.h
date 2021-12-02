@@ -131,7 +131,7 @@ a lot of data that needs to be copied, this should be set high. */
  * LWIP_ICMP==1: Enable ICMP module inside the IP stack.
  * Be careful, disable that make your product non-compliant to RFC1122
  */
-#define LWIP_ICMP                       0
+#define LWIP_ICMP                       1
 
 
 /* ---------- DHCP options ---------- */

@@ -19,7 +19,7 @@ err_t linkoutput_fn(struct netif *netif, struct pbuf *p)
     for (i = 0; i < 200; i++)
     {
         if (rndis_can_send()) break;
-        DWT_Delay_ms(1);
+        DWT_Delay_ms(1); //todo check lower timeout
     }
     for(q = p; q != NULL; q = q->next)
     {

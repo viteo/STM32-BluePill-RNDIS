@@ -100,7 +100,7 @@ void LwIP_Init(void)
 	netif_set_default(&gnetif);
 
 	/* Set Ethernet link flag */
-	gnetif.flags |=  NETIF_FLAG_LINK_UP | NETIF_FLAG_UP;
+	gnetif.flags |=  NETIF_FLAG_LINK_UP;
 
 	/* When the netif is fully configured this function must be called */
 	netif_set_up(&gnetif);

@@ -92,6 +92,7 @@ void EP3_OUT_Callback(void)
 {
 	static int rndis_received = 0;
 	int32_t rxCount = GetEPRxCount(CDC_DAT_EP_OUT_IDX);
+	USB_SIL_Read(CDC_DAT_EP_OUT_IDX, (uint8_t*) usb_rx_buffer);
 	if (rndis_received + rxCount > RNDIS_RX_BUFFER_SIZE)
 	{
 		usb_eth_stat.rxbad++;
@@ -116,7 +117,6 @@ void EP3_OUT_Callback(void)
 		}
 	}
 //	DCD_EP_PrepareRx(pdev, RNDIS_DATA_OUT_EP, (uint8_t*) usb_rx_buffer, RNDIS_DATA_OUT_SZ);
-	USB_SIL_Write(CDC_DAT_EP_OUT_IDX, (uint8_t*) usb_rx_buffer, CDC_DATA_SIZE);
 	SetEPRxCount(CDC_DAT_EP_OUT_IDX, CDC_DATA_SIZE);
 	SetEPRxStatus(CDC_DAT_EP_OUT_IDX, EP_RX_VALID);
 }
