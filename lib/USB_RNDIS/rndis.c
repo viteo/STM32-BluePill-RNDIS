@@ -250,7 +250,7 @@ void handle_packet(const char *data, int size)
 		return;
 	if (p->MessageType != REMOTE_NDIS_PACKET_MSG || p->MessageLength != size)
 		return;
-	if (p->DataOffset + offsetof(rndis_data_packet_t, DataOffset) + p->DataLength != size)
+	if (p->DataOffset + /*offsetof(rndis_data_packet_t, DataOffset)*/ 8 + p->DataLength != size)
 	{
 		usb_eth_stat.rxbad++;
 		return;

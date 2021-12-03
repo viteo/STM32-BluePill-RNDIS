@@ -39,9 +39,6 @@
 #include "netconf.h"
 #include <stdio.h>
 
-/* Private typedef -----------------------------------------------------------*/
-#define MAX_DHCP_TRIES        4
-
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -49,12 +46,6 @@ struct netif gnetif;
 uint32_t TCPTimer = 0;
 uint32_t ARPTimer = 0;
 uint32_t IPaddress = 0;
-
-#if LWIP_DHCP
-uint32_t DHCPfineTimer = 0;
-uint32_t DHCPcoarseTimer = 0;
-volatile uint8_t DHCP_state;
-#endif
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -72,15 +63,9 @@ void LwIP_Init(void)
 
 	lwip_init();
 
-#if LWIP_DHCP
-	ipaddr.addr = 0;
-	netmask.addr = 0;
-	gw.addr = 0;
-#else
 	IP4_ADDR(&ipaddr, IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
 	IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
 	IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
-#endif  
 
 	/* - netif_add(struct netif *netif, struct ip_addr *ipaddr,
 	 struct ip_addr *netmask, struct ip_addr *gw,
@@ -142,101 +127,7 @@ void LwIP_Periodic_Handle(volatile uint32_t localtime)
     ARPTimer =  localtime;
     etharp_tmr();
   }
-  
-#ifdef USE_DHCP
-  /* Fine DHCP periodic process every 500ms */
-  if (localtime - DHCPfineTimer >= DHCP_FINE_TIMER_MSECS)
-  {
-    DHCPfineTimer =  localtime;
-    dhcp_fine_tmr();
-    if ((DHCP_state != DHCP_ADDRESS_ASSIGNED) && 
-        (DHCP_state != DHCP_TIMEOUT) &&
-          (DHCP_state != DHCP_LINK_DOWN))
-    { 
-      /* toggle LED1 to indicate DHCP on-going process */
-      STM_EVAL_LEDToggle(LED1);
-
-      /* process DHCP state machine */
-      LwIP_DHCP_Process_Handle();    
-    }
-  }
-
-  /* DHCP Coarse periodic process every 60s */
-  if (localtime - DHCPcoarseTimer >= DHCP_COARSE_TIMER_MSECS)
-  {
-    DHCPcoarseTimer =  localtime;
-    dhcp_coarse_tmr();
-  }
-
-#endif
 }
-
-#ifdef USE_DHCP
-/**
-* @brief  LwIP_DHCP_Process_Handle
-* @param  None
-* @retval None
-*/
-void LwIP_DHCP_Process_Handle()
-{
-  struct ip_addr ipaddr;
-  struct ip_addr netmask;
-  struct ip_addr gw;
-  uint8_t iptab[4] = {0};
-  uint8_t iptxt[20];
-
-  switch (DHCP_state)
-  {
-  case DHCP_START:
-    {
-      DHCP_state = DHCP_WAIT_ADDRESS;
-      dhcp_start(&gnetif);
-      /* IP address should be set to 0 
-         every time we want to assign a new DHCP address */
-      IPaddress = 0;
-    }
-    break;
-
-  case DHCP_WAIT_ADDRESS:
-    {
-      /* Read the new IP address */
-      IPaddress = gnetif.ip_addr.addr;
-
-      if (IPaddress!=0) 
-      {
-        DHCP_state = DHCP_ADDRESS_ASSIGNED;	
-
-        /* Stop DHCP */
-        dhcp_stop(&gnetif);
-
-        STM_EVAL_LEDOn(LED1);
-      }
-      else
-      {
-        /* DHCP timeout */
-        if (gnetif.dhcp->tries > MAX_DHCP_TRIES)
-        {
-          DHCP_state = DHCP_TIMEOUT;
-
-          /* Stop DHCP */
-          dhcp_stop(&gnetif);
-
-          /* Static address used */
-          IP4_ADDR(&ipaddr, IP_ADDR0 ,IP_ADDR1 , IP_ADDR2 , IP_ADDR3 );
-          IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
-          IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
-          netif_set_addr(&gnetif, &ipaddr , &netmask, &gw);
-
-          STM_EVAL_LEDOn(LED1);
-        }
-      }
-    }
-    break;
-  default: break;
-  }
-}
-#endif
-
 
 uint32_t SubnetToAddr(uint8_t subnet)
 {
