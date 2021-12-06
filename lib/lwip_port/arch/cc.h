@@ -32,8 +32,6 @@
 #ifndef __CC_H__
 #define __CC_H__
 
-#define BYTE_ORDER LITTLE_ENDIAN
-
 #define LWIP_PLATFORM_ASSERT(x) //do { if(!(x)) while(1); } while
 
 #if defined (__GNUC__)

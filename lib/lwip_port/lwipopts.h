@@ -49,6 +49,21 @@
  */
 #define NO_SYS_NO_TIMERS        1
 
+/**
+ * LWIP_RAW==1: Enable application layer to hook into the IP layer itself.
+ */
+#define LWIP_RAW                        1
+
+/**
+ * LWIP_NETCONN==1: Enable Netconn API (require to use api_lib.c)
+ */
+#define LWIP_NETCONN                    0
+
+/**
+ * LWIP_SOCKET==1: Enable Socket API (require to use sockets.c)
+ */
+#define LWIP_SOCKET                     0
+
 /* ---------- Memory options ---------- */
 /* MEM_ALIGNMENT: should be set to the alignment of the CPU for which
    lwIP is compiled. 4 byte alignment -> define MEM_ALIGNMENT to 4, 2
@@ -57,12 +72,12 @@
 
 /* MEM_SIZE: the size of the heap memory. If the application will send
 a lot of data that needs to be copied, this should be set high. */
-#define MEM_SIZE                (4*1024) //todo play with size
+#define MEM_SIZE                (3*1024) //todo play with size
 
 /* MEMP_NUM_PBUF: the number of memp struct pbufs. If the application
    sends a lot of data out of ROM (or other static memory), this
    should be set high. */
-#define MEMP_NUM_PBUF           10
+#define MEMP_NUM_PBUF           3 //todo play with size
 
 /* MEMP_NUM_TCP_PCB_LISTEN: the number of listening TCP
    connections. */
@@ -94,10 +109,10 @@ a lot of data that needs to be copied, this should be set high. */
 
 /* ---------- Pbuf options ---------- */
 /* PBUF_POOL_SIZE: the number of buffers in the pbuf pool. */
-#define PBUF_POOL_SIZE          12
+#define PBUF_POOL_SIZE          4
 
 /* PBUF_POOL_BUFSIZE: the size of each pbuf in the pbuf pool. */
-#define PBUF_POOL_BUFSIZE       512
+#define PBUF_POOL_BUFSIZE       LWIP_MEM_ALIGN_SIZE(TCP_MSS+40+PBUF_LINK_HLEN)
 
 
 /* ---------- TCP options ---------- */
@@ -138,34 +153,21 @@ a lot of data that needs to be copied, this should be set high. */
 /* Define LWIP_DHCP to 1 if you want DHCP configuration of
    interfaces. DHCP is not implemented in lwIP 0.5.1, however, so
    turning this on does currently not work. */
-#define LWIP_DHCP               0 //todo DHCP check
+#define LWIP_DHCP               0
 
 
 /* ---------- UDP options ---------- */
-#define LWIP_UDP                0 //todo not used without DHCP
+#define LWIP_UDP                0
 #define UDP_TTL                 255
 
 
 /* ---------- Statistics options ---------- */
 #define LWIP_STATS 0
 
-
-/**
- * LWIP_RAW==1: Enable application layer to hook into the IP layer itself.
- */
-#define LWIP_RAW                        1
-
-/**
- * LWIP_NETCONN==1: Enable Netconn API (require to use api_lib.c)
- */
-#define LWIP_NETCONN                    0
-
-/**
- * LWIP_SOCKET==1: Enable Socket API (require to use sockets.c)
- */
-#define LWIP_SOCKET                     0
-
-
+#define ETHARP_SUPPORT_STATIC_ENTRIES   1
+#define LWIP_HTTPD_CGI                  1
+#define LWIP_HTTPD_SSI                  1
+#define LWIP_HTTPD_SSI_INCLUDE_TAG      0
 /*
    ----------------------------------------
    ---------- Lwip Debug options ----------
@@ -173,10 +175,6 @@ a lot of data that needs to be copied, this should be set high. */
 */
 //#define LWIP_DEBUG                      1
 
-#define TCPIP_THREAD_NAME               NULL
-#define SLIPIF_THREAD_NAME              NULL
-#define DEFAULT_THREAD_NAME             NULL
- 
 #endif /* __LWIPOPTS_H__ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

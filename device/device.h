@@ -31,11 +31,11 @@
 #define GW_ADDR3   0
 
 /* MAC ADDRESS: MAC_ADDR0:MAC_ADDR1:MAC_ADDR2:MAC_ADDR3:MAC_ADDR4:MAC_ADDR5 */
-#define MAC_ADDR0   02
-#define MAC_ADDR1   00
-#define MAC_ADDR2   00
-#define MAC_ADDR3   00
-#define MAC_ADDR4   00
-#define MAC_ADDR5   00
+#define MAC_ADDR0   0x20
+#define MAC_ADDR1   0x89
+#define MAC_ADDR2   0x84
+#define MAC_ADDR3   0x6A
+#define MAC_ADDR4   0x96
+#define MAC_ADDR5   0x00
 
 #endif /* DEVICE_DEVICE_H_ */
