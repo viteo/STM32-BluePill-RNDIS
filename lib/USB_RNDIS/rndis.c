@@ -6,18 +6,16 @@
  */
 
 #include "rndis.h"
+#include "device.h"
 #include "usb_conf.h"
 #include "usb_sil.h"
 #include "usb_desc.h"
 #include "usb_lib.h"
 #include <string.h>
 
-static const uint8_t station_hwaddr[6] = { RNDIS_HWADDR };
-static const uint8_t permanent_hwaddr[6] = { RNDIS_HWADDR };
-usb_eth_stat_t usb_eth_stat = { 0, 0, 0, 0 };
 uint32_t oid_packet_filter = 0x0000000;
 
-const uint32_t OIDSupportedList[22] =
+const uint32_t OIDSupportedList[OID_LIST_LENGTH] =
 {
     OID_GEN_SUPPORTED_LIST,
     OID_GEN_HARDWARE_STATUS,
@@ -35,16 +33,12 @@ const uint32_t OIDSupportedList[22] =
     OID_GEN_PROTOCOL_OPTIONS,
     OID_GEN_MAC_OPTIONS,
     OID_GEN_MEDIA_CONNECT_STATUS,
-    OID_GEN_MAXIMUM_SEND_PACKETS,
     OID_802_3_PERMANENT_ADDRESS,
     OID_802_3_CURRENT_ADDRESS,
     OID_802_3_MULTICAST_LIST,
     OID_802_3_MAXIMUM_LIST_SIZE,
     OID_802_3_MAC_OPTIONS
 };
-
-rndis_state_t rndis_state;
-static const char *rndis_vendor = RNDIS_VENDOR;
 
 uint8_t encapsulated_buffer[ENC_BUF_SIZE];
 char rndis_rx_buffer[RNDIS_RX_BUFFER_SIZE];
@@ -53,14 +47,7 @@ uint8_t usb_rx_buffer[CDC_DATA_SIZE];
 //todo clean
 uint8_t received[RNDIS_MTU + 14];
 int recvSize = 0;
-void on_packet(const char *data, int size)
-{
-    memcpy(received, data, size);
-    recvSize = size;
-}
-//
 
-rndis_rxproc_t rndis_rxproc = on_packet;
 uint8_t *rndis_tx_ptr = NULL;
 uint8_t rndis_first_tx = 1;
 int rndis_tx_size = 0;
@@ -97,41 +84,36 @@ void rndis_query_cmplt32(int status, uint32_t data)
 	SetEPTxValid(CDC_CMD_EP_IDX);
 }
 
-
 void rndis_query()
 {
 	switch (((rndis_query_msg_t *)encapsulated_buffer)->Oid)
 	{
 		case OID_GEN_SUPPORTED_LIST:         rndis_query_cmplt(RNDIS_STATUS_SUCCESS, OIDSupportedList, 4 * OID_LIST_LENGTH); return;
 		case OID_GEN_VENDOR_DRIVER_VERSION:  rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, 0x00001000);  return;
-		case OID_802_3_CURRENT_ADDRESS:      rndis_query_cmplt(RNDIS_STATUS_SUCCESS, &station_hwaddr, 6); return;
-		case OID_802_3_PERMANENT_ADDRESS:    rndis_query_cmplt(RNDIS_STATUS_SUCCESS, &permanent_hwaddr, 6); return;
-		case OID_GEN_MEDIA_SUPPORTED:        rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, NDIS_MEDIUM_802_3); return;
+		case OID_802_3_CURRENT_ADDRESS:
+		case OID_802_3_PERMANENT_ADDRESS:
+		{
+			uint8_t hwaddr[6]  = {MAC_ADDR0,MAC_ADDR1,MAC_ADDR2,MAC_ADDR3,MAC_ADDR4,MAC_ADDR5};
+			rndis_query_cmplt(RNDIS_STATUS_SUCCESS, hwaddr, 6);
+		}
+		return;
+		case OID_GEN_MEDIA_SUPPORTED:
 		case OID_GEN_MEDIA_IN_USE:           rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, NDIS_MEDIUM_802_3); return;
-		case OID_GEN_PHYSICAL_MEDIUM:        rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, NDIS_MEDIUM_802_3); return;
 		case OID_GEN_HARDWARE_STATUS:        rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, 0); return;
 		case OID_GEN_LINK_SPEED:             rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, RNDIS_LINK_SPEED / 100); return;
 		case OID_GEN_VENDOR_ID:              rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, 0x00FFFFFF); return;
-		case OID_GEN_VENDOR_DESCRIPTION:     rndis_query_cmplt(RNDIS_STATUS_SUCCESS, rndis_vendor, strlen(rndis_vendor) + 1); return;
+		case OID_GEN_VENDOR_DESCRIPTION:     rndis_query_cmplt(RNDIS_STATUS_SUCCESS, RNDIS_VENDOR, strlen(RNDIS_VENDOR) + 1); return;
 		case OID_GEN_CURRENT_PACKET_FILTER:  rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, oid_packet_filter); return;
 		case OID_GEN_MAXIMUM_FRAME_SIZE:     rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, ETH_MAX_PACKET_SIZE - ETH_HEADER_SIZE); return;
+		case OID_GEN_RECEIVE_BLOCK_SIZE:
+		case OID_GEN_TRANSMIT_BLOCK_SIZE:
 		case OID_GEN_MAXIMUM_TOTAL_SIZE:     rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, ETH_MAX_PACKET_SIZE); return;
-		case OID_GEN_TRANSMIT_BLOCK_SIZE:    rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, ETH_MAX_PACKET_SIZE); return;
-		case OID_GEN_RECEIVE_BLOCK_SIZE:     rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, ETH_MAX_PACKET_SIZE); return;
 		case OID_GEN_MEDIA_CONNECT_STATUS:   rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, NDIS_MEDIA_STATE_CONNECTED); return;
-		case OID_GEN_RNDIS_CONFIG_PARAMETER: rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, 0); return;
 		case OID_802_3_MAXIMUM_LIST_SIZE:    rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, 1); return;
-		case OID_802_3_MULTICAST_LIST:       rndis_query_cmplt32(RNDIS_STATUS_NOT_SUPPORTED, 0); return;
+		case OID_802_3_MULTICAST_LIST:
 		case OID_802_3_MAC_OPTIONS:          rndis_query_cmplt32(RNDIS_STATUS_NOT_SUPPORTED, 0); return;
-		case OID_GEN_MAC_OPTIONS:            rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, /*MAC_OPT*/ 0); return;
+		case OID_GEN_MAC_OPTIONS:
 		case OID_802_3_RCV_ERROR_ALIGNMENT:  rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, 0); return;
-		case OID_802_3_XMIT_ONE_COLLISION:   rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, 0); return;
-		case OID_802_3_XMIT_MORE_COLLISIONS: rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, 0); return;
-		case OID_GEN_XMIT_OK:                rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, usb_eth_stat.txok); return;
-		case OID_GEN_RCV_OK:                 rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, usb_eth_stat.rxok); return;
-		case OID_GEN_RCV_ERROR:              rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, usb_eth_stat.rxbad); return;
-		case OID_GEN_XMIT_ERROR:             rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, usb_eth_stat.txbad); return;
-		case OID_GEN_RCV_NO_BUFFER:          rndis_query_cmplt32(RNDIS_STATUS_SUCCESS, 0); return;
 		default:                             rndis_query_cmplt(RNDIS_STATUS_FAILURE, NULL, 0); return;
 	}
 }
@@ -155,36 +137,19 @@ void rndis_handle_set_msg()
 		/* Parameters set up in 'Advanced' tab */
 		case OID_GEN_RNDIS_CONFIG_PARAMETER:
 			{
-                rndis_config_parameter_t *p;
 				char *ptr = (char *)m;
 				ptr += sizeof(rndis_generic_msg_t);
 				ptr += m->InformationBufferOffset;
-				p = (rndis_config_parameter_t *)ptr;
-//todo				rndis_handle_config_parm(ptr, p->ParameterNameOffset, p->ParameterValueOffset, p->ParameterNameLength, p->ParameterValueLength);
 			}
 			break;
 
 		/* Mandatory general OIDs */
 		case OID_GEN_CURRENT_PACKET_FILTER:
 			oid_packet_filter = *((uint32_t *)((uint8_t *)&(m->RequestId) + m->InformationBufferOffset));
-			if (oid_packet_filter)
-			{
-//todo				rndis_packetFilter(oid_packet_filter);
-				rndis_state = rndis_data_initialized;
-			}
-			else
-			{
-				rndis_state = rndis_initialized;
-			}
 			break;
 
 		case OID_GEN_CURRENT_LOOKAHEAD:
-			break;
-
 		case OID_GEN_PROTOCOL_OPTIONS:
-			break;
-
-		/* Mandatory 802_3 OIDs */
 		case OID_802_3_MULTICAST_LIST:
 			break;
 
@@ -203,8 +168,6 @@ void rndis_handle_set_msg()
 	SetEPTxValid(CDC_CMD_EP_IDX);
 	return;
 }
-
-
 
 void usbd_cdc_transfer()
 {
@@ -250,14 +213,12 @@ void handle_packet(const char *data, int size)
 		return;
 	if (p->MessageType != REMOTE_NDIS_PACKET_MSG || p->MessageLength != size)
 		return;
-	if (p->DataOffset + /*offsetof(rndis_data_packet_t, DataOffset)*/ 8 + p->DataLength != size)
+	if (p->DataOffset + /*offsetof(rndis_data_packet_t, DataOffset)*/ 8 + p->DataLength != size) //todo offsetof
 	{
-		usb_eth_stat.rxbad++;
 		return;
 	}
-	usb_eth_stat.rxok++;
-	if (rndis_rxproc != NULL)
-		rndis_rxproc(&rndis_rx_buffer[p->DataOffset + offsetof(rndis_data_packet_t, DataOffset)], p->DataLength);
+	memcpy(received, &rndis_rx_buffer[p->DataOffset + offsetof(rndis_data_packet_t, DataOffset)], p->DataLength);
+	recvSize = size;
 }
 
 uint8_t rndis_can_send(void)

@@ -61,7 +61,7 @@
 *******************************************************************************/
 void EP1_IN_Callback (void)
 {
-	//todo empty?
+
 }
 
 /*******************************************************************************
@@ -95,7 +95,6 @@ void EP3_OUT_Callback(void)
 	USB_SIL_Read(CDC_DAT_EP_OUT_IDX, (uint8_t*) usb_rx_buffer);
 	if (rndis_received + rxCount > RNDIS_RX_BUFFER_SIZE)
 	{
-		usb_eth_stat.rxbad++;
 		rndis_received = 0;
 	}
 	else
@@ -113,7 +112,6 @@ void EP3_OUT_Callback(void)
 		else
 		{
 			rndis_received = 0;
-			usb_eth_stat.rxbad++;
 		}
 	}
 //	DCD_EP_PrepareRx(pdev, RNDIS_DATA_OUT_EP, (uint8_t*) usb_rx_buffer, RNDIS_DATA_OUT_SZ);

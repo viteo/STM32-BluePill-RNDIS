@@ -253,7 +253,6 @@ void RNDIS_Status_In(void)
 		m->PacketAlignmentFactor = 0;
 		m->AfListOffset = 0;
 		m->AfListSize = 0;
-		rndis_state = rndis_initialized;
 		USB_SIL_Write(CDC_CMD_EP, (uint8_t*) "\x01\x00\x00\x00\x00\x00\x00\x00", 8);
 		SetEPTxCount(CDC_CMD_EP_IDX, 8);
 		SetEPTxValid(CDC_CMD_EP_IDX);
@@ -272,7 +271,6 @@ void RNDIS_Status_In(void)
 	{
 		rndis_reset_cmplt_t *m;
 		m = ((rndis_reset_cmplt_t*) encapsulated_buffer);
-		rndis_state = rndis_uninitialized;
 		m->MessageType = REMOTE_NDIS_RESET_CMPLT;
 		m->MessageLength = sizeof(rndis_reset_cmplt_t);
 		m->Status = RNDIS_STATUS_SUCCESS;
@@ -323,7 +321,7 @@ void RNDIS_Status_Out(void)
 *******************************************************************************/
 uint8_t* RNDIS_CopyData(uint16_t Length)
 {
-	if (Length == 0) //todo no need for this check
+	if (Length == 0)
 	{
 		pInformation->Ctrl_Info.Usb_wLength = 8;
 		return NULL;
@@ -381,18 +379,6 @@ RESULT RNDIS_Data_Setup(uint8_t RequestNo)
 *******************************************************************************/
 RESULT RNDIS_NoData_Setup(uint8_t RequestNo)
 {
-//	if ((Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT)))
-//	{
-		switch (RequestNo)
-		{
-		case 0x01:
-			break;
-		case 0xFF: //todo check requests
-			return USB_SUCCESS;
-		default:
-			break;
-		}
-//	}
 	return USB_UNSUPPORT;
 }
 

@@ -287,21 +287,6 @@ typedef struct{
 	rndis_ClassInformationOffset_t	ClassInformationType;
 	}rndis_OOB_packet_t;
 
-#include "ndis.h"
-
-typedef enum rnids_state_e {
-	rndis_uninitialized,
-	rndis_initialized,
-	rndis_data_initialized
-	} rndis_state_t;
-
-typedef struct {
-	uint32_t		txok;
-	uint32_t		rxok;
-	uint32_t		txbad;
-	uint32_t		rxbad;
-} usb_eth_stat_t;
-
 #endif /* _RNDIS_H */
 
 /** @} */

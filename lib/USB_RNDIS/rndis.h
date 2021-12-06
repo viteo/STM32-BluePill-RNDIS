@@ -11,32 +11,24 @@
 #include "ndis.h"
 #include "rndis_protocol.h"
 
-#define RNDIS_MTU        1500                           /* MTU value */
-#define RNDIS_LINK_SPEED 12000000                       /* Link baudrate (12Mbit/s for USB-FS) */
-#define RNDIS_VENDOR     "BluePill"                      /* NIC vendor name */
-#define RNDIS_HWADDR     0x20,0x89,0x84,0x6A,0x96,0xAB  /* MAC-address to set to host interface */
-
+#define RNDIS_VENDOR                "BluePill"                     /* NIC vendor name */
+#define RNDIS_LINK_SPEED            12000000                       /* Link baudrate (12Mbit/s for USB-FS) */
+#define RNDIS_MTU                   1500                           /* MTU value */
 #define ETH_HEADER_SIZE             14
-#define ETH_MAX_PACKET_SIZE         ETH_HEADER_SIZE + RNDIS_MTU
-#define ETH_MIN_PACKET_SIZE         60
+#define ETH_MAX_PACKET_SIZE         RNDIS_MTU + ETH_HEADER_SIZE
 #define RNDIS_RX_BUFFER_SIZE        (ETH_MAX_PACKET_SIZE + sizeof(rndis_data_packet_t))
 
 //todo clean this
 extern uint8_t received[RNDIS_MTU + 14];
 extern int recvSize;
 
-typedef void (*rndis_rxproc_t)(const char *data, int size);
+#define OID_LIST_LENGTH             21
+extern const uint32_t OIDSupportedList[OID_LIST_LENGTH];
 
-extern const uint32_t OIDSupportedList[22];
-#define OID_LIST_LENGTH (sizeof(OIDSupportedList) / sizeof(*OIDSupportedList))
-#define ENC_BUF_SIZE    (OID_LIST_LENGTH * 4 + 32)
-
-extern uint8_t encapsulated_buffer[ENC_BUF_SIZE];
-extern char rndis_rx_buffer[RNDIS_RX_BUFFER_SIZE];
+#define ENC_BUF_SIZE                (OID_LIST_LENGTH * 4 + 32)
+extern uint8_t encapsulated_buffer[];
+extern char rndis_rx_buffer[];
 extern uint8_t usb_rx_buffer[];
-
-extern rndis_state_t rndis_state;
-extern usb_eth_stat_t usb_eth_stat;
 
 extern uint8_t *rndis_tx_ptr;
 extern uint8_t rndis_first_tx;
