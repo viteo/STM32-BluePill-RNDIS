@@ -78,12 +78,7 @@ void Enter_LowPowerMode(void);
 void Leave_LowPowerMode(void);
 void USB_Interrupts_Config(FunctionalState state);
 void USB_Cable_Config (FunctionalState NewState);
-void USB_To_USART_Send_Data(uint8_t* data_buffer, uint8_t Nb_bytes);
-void USART_To_USB_Send_Data(uint8_t received_byte);
-void Handle_USBAsynchXfer (void);
 void Get_SerialNum(void);
-void VCP_SendRxBufPacketToUsb(void);
-void VCP_Data_InISR(void);
 /* External variables --------------------------------------------------------*/
 
 #endif  /*__HW_CONFIG_H*/

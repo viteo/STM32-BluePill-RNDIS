@@ -35,7 +35,8 @@ int main()
 	uint32_t LocalTime = 0;
 	while (1)
 	{
-		LwIP_Pkt_Handle();
+		if (rndis_data_pending())
+			LwIP_Pkt_Handle();
 //		LwIP_Periodic_Handle(LocalTime);
 		LocalTime += 10;
 

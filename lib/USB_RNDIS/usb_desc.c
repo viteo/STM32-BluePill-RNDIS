@@ -106,7 +106,7 @@ const uint8_t RNDIS_ConfigDescriptor[] =
 		0x24,   /* bDescriptorType: CS_INTERFACE */
 		0x01,   /* bDescriptorSubtype: Call Management Func Desc */
 		0x00,   /* bmCapabilities: D0+D1 */
-		CDC_INTERFACE_IDX + 1,   /* bDataInterface: 2 */
+		0x01,   /* bDataInterface: 1 */
 		/*Abstract Control Management Functional Descriptor*/
 		0x04,   /* bFunctionLength */
 		0x24,   /* bDescriptorType: CS_INTERFACE */

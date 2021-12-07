@@ -18,18 +18,17 @@
 
 err_t linkoutput_fn(struct netif *netif, struct pbuf *p)
 {
-    int i;
     struct pbuf *q;
-    static char data[RNDIS_MTU + 14 + 4];
+    static char data[ETH_MAX_PACKET_SIZE];
     int size = 0;
-    for (i = 0; i < 200; i++)
+    for (int i = 0; i < 200; i++)
     {
         if (rndis_can_send()) break;
         DWT_Delay_ms(1);
     }
     for(q = p; q != NULL; q = q->next)
     {
-        if (size + q->len > RNDIS_MTU + 14)
+        if (size + q->len > ETH_MAX_PACKET_SIZE)
             return ERR_ARG;
         memcpy(data + size, (char *)q->payload, q->len);
         size += q->len;
@@ -63,11 +62,6 @@ err_t rndisif_input(struct netif *netif)
 {
     struct pbuf *frame;
     __disable_irq();
-    if (rndis_rx_size == 0) //todo move check outside or merge call with usb on_packet()
-    {
-        __enable_irq();
-        return ERR_OK;
-    }
     frame = pbuf_alloc(PBUF_RAW, rndis_rx_size, PBUF_POOL);
     if (frame == NULL)
     {

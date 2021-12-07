@@ -4,7 +4,7 @@
   * @author  MCD Application Team
   * @version V4.1.0
   * @date    26-May-2017
-  * @brief   All processing related to Virtual Com Port Demo
+  * @brief   All processing related to CDC
   ******************************************************************************
   * @attention
   *
@@ -43,11 +43,10 @@
 #include "usb_desc.h"
 #include "usb_pwr.h"
 #include "hw_config.h"
-#include "ndis.h"
 #include "rndis.h"
+#include "ndis_protocol.h"
 #include "rndis_protocol.h"
 #include <string.h>
-//#include "virtualComPort.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -81,14 +80,14 @@ DEVICE_PROP Device_Property =
 
 USER_STANDARD_REQUESTS User_Standard_Requests =
 {
-		Virtual_Com_Port_GetConfiguration,
+		CDC_GetConfiguration,
 		RNDIS_SetConfiguration,
-		Virtual_Com_Port_GetInterface,
-		Virtual_Com_Port_SetInterface,
-		Virtual_Com_Port_GetStatus,
-		Virtual_Com_Port_ClearFeature,
-		Virtual_Com_Port_SetEndPointFeature,
-		Virtual_Com_Port_SetDeviceFeature,
+		CDC_GetInterface,
+		CDC_SetInterface,
+		CDC_GetStatus,
+		CDC_ClearFeature,
+		CDC_SetEndPointFeature,
+		CDC_SetDeviceFeature,
 		RNDIS_SetDeviceAddress
 };
 
@@ -206,8 +205,6 @@ void RNDIS_SetConfiguration(void)
 {
 	if (pInformation->Current_Configuration != 0)
 	{
-		ClearDTOG_RX(CDC_DAT_EP_OUT_IDX);
-		ClearDTOG_TX(CDC_DAT_EP_IN_IDX);
 		/* Device configured */
 		bDeviceState = CONFIGURED;
 	}
@@ -234,70 +231,7 @@ void RNDIS_SetDeviceAddress(void)
 *******************************************************************************/
 void RNDIS_Status_In(void)
 {
-	switch (((rndis_generic_msg_t*) encapsulated_buffer)->MessageType)
-	{
-	case REMOTE_NDIS_INITIALIZE_MSG:
-	{
-		rndis_initialize_cmplt_t *m;
-		m = ((rndis_initialize_cmplt_t*) encapsulated_buffer);
-		/* m->MessageID is same as before */
-		m->MessageType = REMOTE_NDIS_INITIALIZE_CMPLT;
-		m->MessageLength = sizeof(rndis_initialize_cmplt_t);
-		m->MajorVersion = RNDIS_MAJOR_VERSION;
-		m->MinorVersion = RNDIS_MINOR_VERSION;
-		m->Status = RNDIS_STATUS_SUCCESS;
-		m->DeviceFlags = RNDIS_DF_CONNECTIONLESS;
-		m->Medium = RNDIS_MEDIUM_802_3;
-		m->MaxPacketsPerTransfer = 1;
-		m->MaxTransferSize = RNDIS_RX_BUFFER_SIZE;
-		m->PacketAlignmentFactor = 0;
-		m->AfListOffset = 0;
-		m->AfListSize = 0;
-		USB_SIL_Write(CDC_CMD_EP, (uint8_t*) "\x01\x00\x00\x00\x00\x00\x00\x00", 8);
-		SetEPTxCount(CDC_CMD_EP_IDX, 8);
-		SetEPTxValid(CDC_CMD_EP_IDX);
-	}
-		break;
-
-	case REMOTE_NDIS_QUERY_MSG:
-		rndis_query();
-		break;
-
-	case REMOTE_NDIS_SET_MSG:
-		rndis_handle_set_msg();
-		break;
-
-	case REMOTE_NDIS_RESET_MSG:
-	{
-		rndis_reset_cmplt_t *m;
-		m = ((rndis_reset_cmplt_t*) encapsulated_buffer);
-		m->MessageType = REMOTE_NDIS_RESET_CMPLT;
-		m->MessageLength = sizeof(rndis_reset_cmplt_t);
-		m->Status = RNDIS_STATUS_SUCCESS;
-		m->AddressingReset = 1; /* Make it look like we did something */
-		/* m->AddressingReset = 0; - Windows halts if set to 1 for some reason */
-		USB_SIL_Write(CDC_CMD_EP, (uint8_t*) "\x01\x00\x00\x00\x00\x00\x00\x00", 8);
-		SetEPTxCount(CDC_CMD_EP_IDX, 8);
-		SetEPTxValid(CDC_CMD_EP_IDX);
-	}
-		break;
-
-	case REMOTE_NDIS_KEEPALIVE_MSG:
-	{
-		rndis_keepalive_cmplt_t *m;
-		m = (rndis_keepalive_cmplt_t*) encapsulated_buffer;
-		m->MessageType = REMOTE_NDIS_KEEPALIVE_CMPLT;
-		m->MessageLength = sizeof(rndis_keepalive_cmplt_t);
-		m->Status = RNDIS_STATUS_SUCCESS;
-	}
-		/* We have data to send back */
-		USB_SIL_Write(CDC_CMD_EP, (uint8_t*) "\x01\x00\x00\x00\x00\x00\x00\x00", 8);
-		SetEPTxCount(CDC_CMD_EP_IDX, 8);
-		SetEPTxValid(CDC_CMD_EP_IDX);
-		break;
-	default:
-		break;
-	}
+	rndis_cmd_message();
 }
 
 /*******************************************************************************
@@ -312,13 +246,6 @@ void RNDIS_Status_Out(void)
 
 }
 
-/*******************************************************************************
-* Function Name  : Virtual_Com_Port_Data_Setup
-* Description    : handle the data class specific requests
-* Input          : Request Nb.
-* Output         : None.
-* Return         : USB_UNSUPPORT or USB_SUCCESS.
-*******************************************************************************/
 uint8_t* RNDIS_CopyData(uint16_t Length)
 {
 	if (Length == 0)
@@ -332,6 +259,13 @@ uint8_t* RNDIS_CopyData(uint16_t Length)
 	}
 }
 
+/*******************************************************************************
+* Function Name  : RNDIS_Data_Setup
+* Description    : handle the data class specific requests
+* Input          : Request Nb.
+* Output         : None.
+* Return         : USB_UNSUPPORT or USB_SUCCESS.
+*******************************************************************************/
 RESULT RNDIS_Data_Setup(uint8_t RequestNo)
 {
 	switch(pInformation->USBbmRequestType & REQUEST_TYPE)
@@ -342,7 +276,6 @@ RESULT RNDIS_Data_Setup(uint8_t RequestNo)
 			/* Check if the request is Device-to-Host */
 			if(pInformation->USBbmRequestType & 0x80)
 			{
-				//USBD_CtlSendData(pdev, encapsulated_buffer, ((rndis_generic_msg_t *)encapsulated_buffer)->MessageLength);
 				pInformation->Ctrl_Info.Usb_wLength = ((rndis_generic_msg_t *)encapsulated_buffer)->MessageLength;
 				pInformation->Ctrl_Info.Usb_wOffset = 0;
 				pInformation->Ctrl_Info.CopyData = RNDIS_CopyData;
@@ -350,7 +283,6 @@ RESULT RNDIS_Data_Setup(uint8_t RequestNo)
 			}
 			else /* Host-to-Device requeset */
 			{
-				//USBD_CtlPrepareRx(pdev, encapsulated_buffer, req->wLength);
 				pInformation->Ctrl_Info.Usb_rLength = pInformation->USBwLength;
 				pInformation->Ctrl_Info.Usb_rOffset = 0;
 				pInformation->Ctrl_Info.CopyData = RNDIS_CopyData;
@@ -371,7 +303,7 @@ RESULT RNDIS_Data_Setup(uint8_t RequestNo)
 }
 
 /*******************************************************************************
-* Function Name  : Virtual_Com_Port_NoData_Setup.
+* Function Name  : RNDIS_NoData_Setup.
 * Description    : handle the no data class specific requests.
 * Input          : Request Nb.
 * Output         : None.
@@ -383,7 +315,7 @@ RESULT RNDIS_NoData_Setup(uint8_t RequestNo)
 }
 
 /*******************************************************************************
-* Function Name  : Virtual_Com_Port_GetDeviceDescriptor.
+* Function Name  : RNDIS_GetDeviceDescriptor.
 * Description    : Gets the device descriptor.
 * Input          : Length.
 * Output         : None.
@@ -395,7 +327,7 @@ uint8_t *RNDIS_GetDeviceDescriptor(uint16_t Length)
 }
 
 /*******************************************************************************
-* Function Name  : Virtual_Com_Port_GetConfigDescriptor.
+* Function Name  : RNDIS_GetConfigDescriptor.
 * Description    : get the configuration descriptor.
 * Input          : Length.
 * Output         : None.
@@ -407,7 +339,7 @@ uint8_t *RNDIS_GetConfigDescriptor(uint16_t Length)
 }
 
 /*******************************************************************************
-* Function Name  : Virtual_Com_Port_GetStringDescriptor
+* Function Name  : RNDIS_GetStringDescriptor
 * Description    : Gets the string descriptors according to the needed index
 * Input          : Length.
 * Output         : None.
@@ -427,7 +359,7 @@ uint8_t *RNDIS_GetStringDescriptor(uint16_t Length)
 }
 
 /*******************************************************************************
-* Function Name  : Virtual_Com_Port_Get_Interface_Setting.
+* Function Name  : RNDIS_Get_Interface_Setting.
 * Description    : test the interface and the alternate setting according to the
 *                  supported one.
 * Input1         : uint8_t: Interface : interface number.

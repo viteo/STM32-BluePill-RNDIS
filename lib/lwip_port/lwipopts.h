@@ -52,17 +52,17 @@
 /**
  * LWIP_RAW==1: Enable application layer to hook into the IP layer itself.
  */
-#define LWIP_RAW                        1
+#define LWIP_RAW                1
 
 /**
  * LWIP_NETCONN==1: Enable Netconn API (require to use api_lib.c)
  */
-#define LWIP_NETCONN                    0
+#define LWIP_NETCONN            0
 
 /**
  * LWIP_SOCKET==1: Enable Socket API (require to use sockets.c)
  */
-#define LWIP_SOCKET                     0
+#define LWIP_SOCKET             0
 
 /* ---------- Memory options ---------- */
 /* MEM_ALIGNMENT: should be set to the alignment of the CPU for which
@@ -90,13 +90,6 @@ a lot of data that needs to be copied, this should be set high. */
 #define MEMP_NUM_SYS_TIMEOUT    3
 
 /*
- * MEM_LIBC_MALLOC==1: Use malloc/free/realloc provided by your C-library
- * instead of the lwip internal allocator. Can save code size if you
- * already use it.
- */
-#define MEM_LIBC_MALLOC			0
-
-/*
  * MEMP_MEM_MALLOC==1: Use mem_malloc/mem_free instead of the lwip pool allocator.
  * Especially useful with MEM_LIBC_MALLOC but handle with care regarding execution
  * speed (heap alloc can be much slower than pool alloc) and usage from interrupts
@@ -105,7 +98,14 @@ a lot of data that needs to be copied, this should be set high. */
  * ATTENTION: Currently, this uses the heap for ALL pools (also for private pools,
  * not only for internal pools defined in memp_std.h)!
  */
-#define MEMP_MEM_MALLOC			0 //todo test with alloc enabled
+#define MEMP_MEM_MALLOC			0 //todo saves a lot of RAM
+
+/*
+ * MEM_LIBC_MALLOC==1: Use malloc/free/realloc provided by your C-library
+ * instead of the lwip internal allocator. Can save code size if you
+ * already use it.
+ */
+#define MEM_LIBC_MALLOC			0 //todo saves some FLASH
 
 /* ---------- Pbuf options ---------- */
 /* PBUF_POOL_SIZE: the number of buffers in the pbuf pool. */
@@ -136,17 +136,22 @@ a lot of data that needs to be copied, this should be set high. */
 /* TCP receive window. */
 #define TCP_WND                 (2*TCP_MSS)
 
+/** ETHARP_SUPPORT_STATIC_ENTRIES==1: enable code to support static ARP table
+ * entries (using etharp_add_static_entry/etharp_remove_static_entry).
+ */
+#define ETHARP_SUPPORT_STATIC_ENTRIES   1
+
 /**
  * LWIP_SINGLE_NETIF==1: use a single netif only. This is the common case for
  * small real-life targets. Some code like routing etc. can be left out.
  */
-#define LWIP_SINGLE_NETIF               1
+#define LWIP_SINGLE_NETIF       1
 
 /*
  * LWIP_ICMP==1: Enable ICMP module inside the IP stack.
  * Be careful, disable that make your product non-compliant to RFC1122
  */
-#define LWIP_ICMP                       1
+#define LWIP_ICMP               1
 
 
 /* ---------- DHCP options ---------- */
@@ -164,10 +169,13 @@ a lot of data that needs to be copied, this should be set high. */
 /* ---------- Statistics options ---------- */
 #define LWIP_STATS 0
 
-#define ETHARP_SUPPORT_STATIC_ENTRIES   1
+
+/* ---------- HTTPD options ---------- */
 #define LWIP_HTTPD_CGI                  1
 #define LWIP_HTTPD_SSI                  1
 #define LWIP_HTTPD_SSI_INCLUDE_TAG      0
+//#define HTTPD_USE_CUSTOM_FSDATA         1
+
 /*
    ----------------------------------------
    ---------- Lwip Debug options ----------

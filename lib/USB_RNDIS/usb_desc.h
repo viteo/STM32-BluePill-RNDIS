@@ -4,7 +4,7 @@
   * @author  MCD Application Team
   * @version V4.1.0
   * @date    26-May-2017
-  * @brief   Descriptor Header for Virtual COM Port Device
+  * @brief   Descriptor Header for RNDIS Device
   ******************************************************************************
   * @attention
   *
@@ -60,6 +60,7 @@
 #define USB_STRING_DESCRIPTOR_TYPE              0x03
 #define USB_INTERFACE_DESCRIPTOR_TYPE           0x04
 #define USB_ENDPOINT_DESCRIPTOR_TYPE            0x05
+#define USB_DEVICE_QUALIFIER_DESCRIPTOR         0x06
 
 #define CDC_INTERFACE_SIZE         8
 #define CDC_DATA_SIZE              64

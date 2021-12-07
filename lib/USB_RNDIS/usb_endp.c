@@ -74,15 +74,13 @@ void EP1_IN_Callback (void)
 void EP2_IN_Callback(void)
 {
 	rndis_first_tx = 0;
-	rndis_sended += sended;
-	rndis_tx_size -= sended;
-	rndis_tx_ptr += sended;
-	sended = 0;
-	usbd_cdc_transfer();
+	rndis_tx_size -= usb_sended;
+	rndis_tx_ptr += usb_sended;
+	usb_sended = 0;
 }
 
 /*******************************************************************************
-* Function Name  : EP2_OUT_Callback
+* Function Name  : EP3_OUT_Callback
 * Description    :
 * Input          : None.
 * Output         : None.
@@ -99,7 +97,7 @@ void EP3_OUT_Callback(void)
 		rndis_received += rxCount;
 		if (rxCount != CDC_DATA_SIZE)
 		{
-			handle_packet(usb_rx_buffer, rndis_received);
+			rndis_handle_packet(usb_rx_buffer, rndis_received);
 			rndis_received = 0;
 		}
 	}
