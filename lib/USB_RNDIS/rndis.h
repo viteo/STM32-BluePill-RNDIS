@@ -18,18 +18,15 @@
 #define ETH_MAX_PACKET_SIZE         RNDIS_MTU + ETH_HEADER_SIZE
 #define RNDIS_RX_BUFFER_SIZE        (ETH_MAX_PACKET_SIZE + sizeof(rndis_data_packet_t))
 
-//todo clean this
-extern uint8_t received[RNDIS_MTU + 14];
-extern int recvSize;
-
 #define OID_LIST_LENGTH             21
 extern const uint32_t OIDSupportedList[OID_LIST_LENGTH];
 
 #define ENC_BUF_SIZE                (OID_LIST_LENGTH * 4 + 32)
 extern uint8_t encapsulated_buffer[];
-extern char rndis_rx_buffer[];
 extern uint8_t usb_rx_buffer[];
 
+extern uint8_t *rndis_rx_ptr;
+extern int rndis_rx_size;
 extern uint8_t *rndis_tx_ptr;
 extern uint8_t rndis_first_tx;
 extern int rndis_tx_size;

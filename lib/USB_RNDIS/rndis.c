@@ -41,12 +41,10 @@ const uint32_t OIDSupportedList[OID_LIST_LENGTH] =
 };
 
 uint8_t encapsulated_buffer[ENC_BUF_SIZE];
-char rndis_rx_buffer[RNDIS_RX_BUFFER_SIZE];
-uint8_t usb_rx_buffer[CDC_DATA_SIZE];
+uint8_t usb_rx_buffer[RNDIS_RX_BUFFER_SIZE];
 
-//todo clean
-uint8_t received[RNDIS_MTU + 14];
-int recvSize = 0;
+uint8_t *rndis_rx_ptr = NULL;
+int rndis_rx_size = 0;
 
 uint8_t *rndis_tx_ptr = NULL;
 uint8_t rndis_first_tx = 1;
@@ -213,12 +211,13 @@ void handle_packet(const char *data, int size)
 		return;
 	if (p->MessageType != REMOTE_NDIS_PACKET_MSG || p->MessageLength != size)
 		return;
-	if (p->DataOffset + /*offsetof(rndis_data_packet_t, DataOffset)*/ 8 + p->DataLength != size) //todo offsetof
+	if (p->DataOffset + offsetof(rndis_data_packet_t, DataOffset) + p->DataLength != size) //todo offsetof
 	{
 		return;
 	}
-	memcpy(received, &rndis_rx_buffer[p->DataOffset + offsetof(rndis_data_packet_t, DataOffset)], p->DataLength);
-	recvSize = size;
+//	memcpy(received, &rndis_rx_buffer[p->DataOffset + offsetof(rndis_data_packet_t, DataOffset)], p->DataLength);
+	rndis_rx_ptr = &usb_rx_buffer[p->DataOffset + offsetof(rndis_data_packet_t, DataOffset)];
+	rndis_rx_size = size;
 }
 
 uint8_t rndis_can_send(void)

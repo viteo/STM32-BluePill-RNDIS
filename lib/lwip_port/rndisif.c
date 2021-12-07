@@ -63,20 +63,20 @@ err_t rndisif_input(struct netif *netif)
 {
     struct pbuf *frame;
     __disable_irq();
-    if (recvSize == 0) //todo move check outside or merge call with usb on_packet()
+    if (rndis_rx_size == 0) //todo move check outside or merge call with usb on_packet()
     {
         __enable_irq();
         return ERR_OK;
     }
-    frame = pbuf_alloc(PBUF_RAW, recvSize, PBUF_POOL);
+    frame = pbuf_alloc(PBUF_RAW, rndis_rx_size, PBUF_POOL);
     if (frame == NULL)
     {
         __enable_irq();
         return ERR_MEM;
     }
-    memcpy(frame->payload, received, recvSize);
-    frame->len = recvSize;
-    recvSize = 0;
+    memcpy(frame->payload, rndis_rx_ptr, rndis_rx_size);
+    frame->len = rndis_rx_size;
+    rndis_rx_size = 0;
     __enable_irq();
     netif->input(frame, netif);
     pbuf_free(frame);

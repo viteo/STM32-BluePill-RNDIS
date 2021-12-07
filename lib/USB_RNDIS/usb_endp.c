@@ -92,27 +92,20 @@ void EP3_OUT_Callback(void)
 {
 	static int rndis_received = 0;
 	int32_t rxCount = GetEPRxCount(CDC_DAT_EP_OUT_IDX);
-	USB_SIL_Read(CDC_DAT_EP_OUT_IDX, (uint8_t*) usb_rx_buffer);
-	if (rndis_received + rxCount > RNDIS_RX_BUFFER_SIZE)
+
+	if (rndis_received + rxCount <= RNDIS_RX_BUFFER_SIZE)
 	{
-		rndis_received = 0;
+		rxCount = USB_SIL_Read(CDC_DAT_EP_OUT_IDX, (uint8_t*) &usb_rx_buffer[rndis_received]);
+		rndis_received += rxCount;
+		if (rxCount != CDC_DATA_SIZE)
+		{
+			handle_packet(usb_rx_buffer, rndis_received);
+			rndis_received = 0;
+		}
 	}
 	else
 	{
-		if (rndis_received + rxCount <= RNDIS_RX_BUFFER_SIZE)
-		{
-			memcpy(&rndis_rx_buffer[rndis_received], usb_rx_buffer, rxCount);
-			rndis_received += rxCount;
-			if (rxCount != CDC_DATA_SIZE)
-			{
-				handle_packet(rndis_rx_buffer, rndis_received);
-				rndis_received = 0;
-			}
-		}
-		else
-		{
-			rndis_received = 0;
-		}
+		rndis_received = 0;
 	}
 //	DCD_EP_PrepareRx(pdev, RNDIS_DATA_OUT_EP, (uint8_t*) usb_rx_buffer, RNDIS_DATA_OUT_SZ);
 	SetEPRxCount(CDC_DAT_EP_OUT_IDX, CDC_DATA_SIZE);
