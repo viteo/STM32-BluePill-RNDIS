@@ -29,6 +29,18 @@ static dhcp_config_t dhcp_config =
     entries               /* entries */
 };
 
+#include "dnserver.h"
+static uint8_t ipaddr[4]  = {192, 168, 7, 1};
+
+uint32_t dns_query_proc(const char *name, ip_addr_t *addr)
+{
+    if (strcmp(name, "run.stm") == 0 || strcmp(name, "www.run.stm") == 0)
+    {
+        addr->addr = *(uint32_t *)ipaddr;
+        return 1;
+    }
+    return 0;
+}
 
 int main()
 {
@@ -51,7 +63,7 @@ int main()
 
     while (dhserv_init(&dhcp_config) != ERR_OK) ;
 
-//    while (dnserv_init(PADDR(ipaddr), 53, dns_query_proc) != ERR_OK) ;
+    while (dnserv_init((ip_addr_t *)ipaddr, 53, dns_query_proc) != ERR_OK) ;
 
 	uint32_t LocalTime = 0;
 	while (1)
