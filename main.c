@@ -9,6 +9,27 @@
 #include "httpd_cgi_ssi.h"
 #include "rndis.h"
 
+#include "dhserver.h"
+#define NUM_DHCP_ENTRY 3
+
+static dhcp_entry_t entries[NUM_DHCP_ENTRY] =
+{
+    /* mac    ip address        subnet mask        lease time */
+    { {0}, {192, 168, 7, 2}, {255, 255, 255, 0}, 24 * 60 * 60 },
+    { {0}, {192, 168, 7, 3}, {255, 255, 255, 0}, 24 * 60 * 60 },
+    { {0}, {192, 168, 7, 4}, {255, 255, 255, 0}, 24 * 60 * 60 }
+};
+
+static dhcp_config_t dhcp_config =
+{
+    {192, 168, 7, 1}, 67, /* server address, port */
+    {192, 168, 7, 1},     /* dns server */
+    "stm",                /* dns suffix */
+    NUM_DHCP_ENTRY,       /* num entry */
+    entries               /* entries */
+};
+
+
 int main()
 {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
@@ -28,7 +49,7 @@ int main()
 	LwIP_Init();
 	LwIP_httpd_Init();
 
-//    while (dhserv_init(&dhcp_config) != ERR_OK) ;
+    while (dhserv_init(&dhcp_config) != ERR_OK) ;
 
 //    while (dnserv_init(PADDR(ipaddr), 53, dns_query_proc) != ERR_OK) ;
 
@@ -38,10 +59,12 @@ int main()
 		if (rndis_data_pending())
 			LwIP_Pkt_Handle();
 //		LwIP_Periodic_Handle(LocalTime);
-		LocalTime += 10;
-
-		if(LocalTime % 500 == 0)
-			GPIO_ToggleBits(GPIOC, PIN_LED);
-		DWT_Delay_ms(10);
+//		LocalTime += 10;
+//
+//		if(LocalTime % 500 == 0)
+//		{
+//			GPIO_ToggleBits(GPIOC, PIN_LED);
+//		}
+//		DWT_Delay_ms(10);
 	}
 }

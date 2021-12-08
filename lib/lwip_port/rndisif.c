@@ -72,7 +72,10 @@ err_t rndisif_input(struct netif *netif)
     frame->len = rndis_rx_size;
     rndis_rx_size = 0;
     __enable_irq();
-    netif->input(frame, netif);
-    pbuf_free(frame);
-    return ERR_OK;
+    err_t err = netif->input(frame, netif);
+    if(err != ERR_OK)
+    {
+    	pbuf_free(frame);
+    }
+    return err;
 }

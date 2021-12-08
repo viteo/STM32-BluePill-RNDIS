@@ -162,8 +162,9 @@ a lot of data that needs to be copied, this should be set high. */
 
 
 /* ---------- UDP options ---------- */
-#define LWIP_UDP                0
-#define UDP_TTL                 255
+#define LWIP_UDP                1
+//accept udp on port 67
+#define LWIP_IP_ACCEPT_UDP_PORT(p)      ((p) == PP_NTOHS(67))
 
 
 /* ---------- Statistics options ---------- */
