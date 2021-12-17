@@ -99,8 +99,8 @@ char magic_cookie[] = {0x63,0x82,0x53,0x63};
 static dhcp_entry_t *entry_by_ip(uint32_t ip)
 {
 	int i;
-	for (i = 0; i < config->num_entry; i++)
-		if (*(uint32_t *)config->entries[i].addr == ip)
+	for (i = 0; i < config->entry_count; i++)
+		if (config->entries[i].addr.addr == ip)
 			return &config->entries[i];
 	return NULL;
 }
@@ -108,13 +108,13 @@ static dhcp_entry_t *entry_by_ip(uint32_t ip)
 static dhcp_entry_t *entry_by_mac(uint8_t *mac)
 {
 	int i;
-	for (i = 0; i < config->num_entry; i++)
+	for (i = 0; i < config->entry_count; i++)
 		if (memcmp(config->entries[i].mac, mac, 6) == 0)
 			return &config->entries[i];
 	return NULL;
 }
 
-static __inline bool is_vacant(dhcp_entry_t *entry)
+static __inline uint32_t is_vacant(dhcp_entry_t *entry)
 {
 	return memcmp("\0\0\0\0\0", entry->mac, 6) == 0;
 }
@@ -122,7 +122,7 @@ static __inline bool is_vacant(dhcp_entry_t *entry)
 static dhcp_entry_t *vacant_address()
 {
 	int i;
-	for (i = 0; i < config->num_entry; i++)
+	for (i = 0; i < config->entry_count; i++)
 		if (is_vacant(config->entries + i))
 			return config->entries + i;
 	return NULL;
@@ -234,7 +234,7 @@ static void udp_recv_proc(void *arg, struct udp_pcb *upcb, struct pbuf *p, const
 			dhcp_data.dp_op = 2; /* reply */
 			dhcp_data.dp_secs = 0;
 			dhcp_data.dp_flags = 0;
-			*(uint32_t *)dhcp_data.dp_yiaddr = *(uint32_t *)entry->addr;
+			*(uint32_t *)dhcp_data.dp_yiaddr = entry->addr.addr;
 			memcpy(dhcp_data.dp_magic, magic_cookie, 4);
 
 			memset(dhcp_data.dp_options, 0, sizeof(dhcp_data.dp_options));
@@ -242,11 +242,11 @@ static void udp_recv_proc(void *arg, struct udp_pcb *upcb, struct pbuf *p, const
 			fill_options(dhcp_data.dp_options,
 				DHCP_OFFER,
 				config->domain,
-				*(uint32_t *)config->dns,
+				config->dns->addr,
 				entry->lease, 
-				*(uint32_t *)config->addr,
-				*(uint32_t *)config->addr, 
-				*(uint32_t *)entry->subnet);
+				config->addr->addr,
+				config->addr->addr,
+				entry->subnet.addr);
 
 			pp = pbuf_alloc(PBUF_TRANSPORT, sizeof(dhcp_data), PBUF_POOL);
 			if (pp == NULL) break;
@@ -284,11 +284,11 @@ static void udp_recv_proc(void *arg, struct udp_pcb *upcb, struct pbuf *p, const
 			fill_options(dhcp_data.dp_options,
 				DHCP_ACK,
 				config->domain,
-				*(uint32_t *)config->dns,
+				config->dns->addr,
 				entry->lease, 
-				*(uint32_t *)config->addr,
-				*(uint32_t *)config->addr, 
-				*(uint32_t *)entry->subnet);
+				config->addr->addr,
+				config->addr->addr,
+				entry->subnet.addr);
 
 			/* 6. send ACK */
 			pp = pbuf_alloc(PBUF_TRANSPORT, sizeof(dhcp_data), PBUF_POOL);

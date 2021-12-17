@@ -85,7 +85,7 @@ void rndis_cmd_query()
 		case OID_802_3_CURRENT_ADDRESS:
 		case OID_802_3_PERMANENT_ADDRESS:
 		{
-			uint8_t hwaddr[6]  = {MAC_ADDR0,MAC_ADDR1,MAC_ADDR2,MAC_ADDR3,MAC_ADDR4,0xAB};
+			uint8_t hwaddr[6]  = {MAC_ADDR0,MAC_ADDR1,MAC_ADDR2,MAC_ADDR3,MAC_ADDR4,MAC_ADDR5};
 			rndis_query_cmplt(RNDIS_STATUS_SUCCESS, hwaddr, 6);
 		}
 		return;

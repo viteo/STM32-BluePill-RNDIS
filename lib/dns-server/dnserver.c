@@ -28,6 +28,8 @@
  */
 
 #include "dnserver.h"
+#include <string.h>
+#include "lwip/netif.h"
 
 #define DNS_MAX_HOST_NAME_LEN 128
 
@@ -93,7 +95,7 @@ static int parse_next_query(void *data, int size, dns_query_t *query)
 	lables = 0;
 	ptr = (uint8_t *)data;
 
-	while (true)
+	while (1)
 	{
 		uint8_t lable_len;
 		if (size <= 0) return -1;
@@ -123,7 +125,7 @@ static int parse_next_query(void *data, int size, dns_query_t *query)
 	return ptr - (uint8_t *)data;
 }
 
-static void udp_recv_proc(void *arg, struct udp_pcb *upcb, struct pbuf *p, struct ip_addr *addr, u16_t port)
+static void udp_recv_proc(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
 {
 	int len;
 	dns_header_t *header;
@@ -164,7 +166,7 @@ error:
 	pbuf_free(p);
 }
 
-err_t dnserv_init(ip_addr_t *bind, uint16_t port, dns_query_proc_t qp)
+err_t dnserv_init(const ip_addr_t *bind, uint16_t port, dns_query_proc_t qp)
 {
 	err_t err;
 	udp_init();

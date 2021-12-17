@@ -34,6 +34,7 @@ extern int usb_sended;
 
 void rndis_query_cmplt(int status, const void *data, int size);
 void rndis_query_cmplt32(int status, uint32_t data);
+void rndis_cmd_message();
 void rndis_cmd_query();
 void rndis_cmd_set_msg();
 void rndis_handle_packet(const uint8_t *data, int size);

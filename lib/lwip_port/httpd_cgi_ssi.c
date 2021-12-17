@@ -71,7 +71,7 @@ const tCGI CGI_Handlers[] =
 		{ "/leds.cgi", CGI_LEDS_Handler },
 };
 
-void LwIP_httpd_Init()
+void LwIP_HTTPD_Init()
 {
 	http_set_ssi_handler(SSI_Handler, SSI_TAGS, sizeof(SSI_TAGS) / sizeof(SSI_TAGS[0]));
 	http_set_cgi_handlers(CGI_Handlers, sizeof(CGI_Handlers) / sizeof(tCGI));

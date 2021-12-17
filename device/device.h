@@ -36,6 +36,6 @@
 #define MAC_ADDR2   0x84
 #define MAC_ADDR3   0x6A
 #define MAC_ADDR4   0x96
-#define MAC_ADDR5   0x00
+#define MAC_ADDR5   0xAB
 
 #endif /* DEVICE_DEVICE_H_ */

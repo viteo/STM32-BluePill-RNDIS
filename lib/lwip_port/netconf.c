@@ -12,6 +12,40 @@
 #include "netif/ethernet.h"
 
 struct netif rndis_netif;
+const ip_addr_t ipaddr  = IPADDR4_INIT_BYTES(IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
+const ip_addr_t netmask = IPADDR4_INIT_BYTES(NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
+const ip_addr_t gateway = IPADDR4_INIT_BYTES(GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+
+#include "dhserver.h"
+static dhcp_entry_t entries[] =
+{
+    /* mac    ip address                           subnet mask                        lease time */
+    { {0}, IPADDR4_INIT_BYTES(192, 168, 7, 2), IPADDR4_INIT_BYTES(255, 255, 255, 0), 24 * 60 * 60 },
+    { {0}, IPADDR4_INIT_BYTES(192, 168, 7, 3), IPADDR4_INIT_BYTES(255, 255, 255, 0), 24 * 60 * 60 },
+    { {0}, IPADDR4_INIT_BYTES(192, 168, 7, 4), IPADDR4_INIT_BYTES(255, 255, 255, 0), 24 * 60 * 60 }
+};
+
+static dhcp_config_t dhcp_config =
+{
+	&ipaddr,              /* server address */
+	67,                   /* port */
+    &ipaddr,              /* dns server */
+    "stm",                /* dns suffix */
+    sizeof(entries) / sizeof(entries[0]),       /* entry count */
+    entries               /* entries */
+};
+
+#include "dnserver.h"
+
+uint32_t dns_query_proc(const char *name, ip_addr_t *addr)
+{
+    if (strcmp(name, "run.stm") == 0 || strcmp(name, "www.run.stm") == 0)
+    {
+        addr->addr = ipaddr.addr;
+        return 1;
+    }
+    return 0;
+}
 
 /*
  * @brief  Initializes the lwIP stack
@@ -21,20 +55,17 @@ struct netif rndis_netif;
 void LwIP_Init(void)
 {
     struct netif  *netif = &rndis_netif;
-    uint8_t ipaddr[4]  = {IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3};
-    uint8_t netmask[4] = {NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3};
-    uint8_t gateway[4] = {GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3};
-    uint8_t hwaddr[6]  = {MAC_ADDR0,MAC_ADDR1,MAC_ADDR2,MAC_ADDR3,MAC_ADDR4,MAC_ADDR5};
 
     lwip_init();
-    netif->hwaddr_len = 6;
-    memcpy(netif->hwaddr, hwaddr, 6);
 
-    netif = netif_add(netif, (ip_addr_t *)ipaddr, (ip_addr_t *)netmask, (ip_addr_t *)gateway, NULL, rndisif_init, ethernet_input);
+    netif = netif_add(netif, &ipaddr, &netmask, &gateway, NULL, rndisif_init, ethernet_input);
     netif_set_default(netif);
 
-	/* Wait for it */
     while (!netif_is_up(netif)) ;
+
+    while (dhserv_init(&dhcp_config)) ;
+
+    while (dnserv_init(&ipaddr, 53, dns_query_proc)) ;
 }
 
 /**

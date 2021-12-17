@@ -8,6 +8,6 @@
 #ifndef LWIP_PORT_HTTPD_CGI_SSI_H_
 #define LWIP_PORT_HTTPD_CGI_SSI_H_
 
-void LwIP_httpd_Init();
+void LwIP_HTTPD_Init();
 
 #endif /* LWIP_PORT_HTTPD_CGI_SSI_H_ */

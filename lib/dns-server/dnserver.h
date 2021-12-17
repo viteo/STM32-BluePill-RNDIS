@@ -30,18 +30,11 @@
 #ifndef DNSERVER
 #define DNSERVER
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
-#include "lwip/def.h"
-#include "lwip/err.h"
 #include "lwip/udp.h"
-#include "netif/etharp.h"
 
-typedef bool (*dns_query_proc_t)(const char *name, ip_addr_t *addr);
+typedef uint32_t (*dns_query_proc_t)(const char *name, ip_addr_t *addr);
 
-err_t dnserv_init(ip_addr_t *bind, uint16_t port, dns_query_proc_t query_proc);
+err_t dnserv_init(const ip_addr_t *bind, uint16_t port, dns_query_proc_t query_proc);
 void  dnserv_free(void);
 
 #endif

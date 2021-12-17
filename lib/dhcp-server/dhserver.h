@@ -42,19 +42,19 @@
 typedef struct dhcp_entry
 {
 	uint8_t  mac[6];
-	uint8_t  addr[4];
-	uint8_t  subnet[4];
+	ip_addr_t  addr;
+	ip_addr_t  subnet;
 	uint32_t lease;
 } dhcp_entry_t;
 
 typedef struct dhcp_config
 {
-	uint8_t       addr[4];
-	uint16_t      port;
-	uint8_t       dns[4];
-	const char   *domain;
-	int           num_entry;
-	dhcp_entry_t *entries;
+	const ip_addr_t    *addr;
+	const uint16_t      port;
+	const ip_addr_t    *dns;
+	const char         *domain;
+	const int           entry_count;
+	dhcp_entry_t       *entries;
 } dhcp_config_t;
 
 err_t dhserv_init(dhcp_config_t *config);
