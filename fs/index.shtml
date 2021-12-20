@@ -1,0 +1,24 @@
+<html>
+<head>
+<title>RNDIS Bluepull with lwIP</title>
+</head>
+<body>
+<table style="margin-left: auto; margin-right: auto;">
+<tr>
+<td>
+<form method="get" action="/leds.cgi">
+<table>
+<tr>
+<th>LED PC13</th>
+<td>
+<input type="checkbox" id="ld1" name="led" value="1" <!--#IsLED--> />
+</td>
+</tr>
+</table>
+<input value="OK" type="submit"/>
+</form>
+</td>
+<td><img src="./img/BluePill.svg"></td>
+</tr>
+</table>
+</body>

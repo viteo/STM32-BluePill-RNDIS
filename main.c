@@ -33,12 +33,12 @@ int main()
 		if (rndis_data_pending())
 			LwIP_Pkt_Handle();
 
-		static uint32_t LocalTime = 0;
-		LocalTime += 10;
-		if(LocalTime % 500 == 0)
-		{
-			GPIO_ToggleBits(GPIOC, PIN_LED);
-		}
-		DWT_Delay_ms(10);
+//		static uint32_t LocalTime = 0;
+//		LocalTime += 10;
+//		if(LocalTime % 500 == 0)
+//		{
+//			GPIO_ToggleBits(GPIOC, PIN_LED);
+//		}
+//		DWT_Delay_ms(10);
 	}
 }

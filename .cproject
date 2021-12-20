@@ -82,7 +82,7 @@
 					<sourceEntries>
 						<entry excluding="device|lib/cmsis|lib/spl|lib|Startup" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Startup"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="device"/>
+						<entry excluding="fsdata_custom.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="device"/>
 						<entry excluding="lwip/src/apps/http/fsdata.c|lwip/src/apps/http/makefsdata|lwip/doc|lwip/test" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="lib"/>
 					</sourceEntries>
 				</configuration>

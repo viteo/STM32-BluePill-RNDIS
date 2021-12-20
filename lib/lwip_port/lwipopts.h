@@ -175,7 +175,9 @@ a lot of data that needs to be copied, this should be set high. */
 #define LWIP_HTTPD_CGI                  1
 #define LWIP_HTTPD_SSI                  1
 #define LWIP_HTTPD_SSI_INCLUDE_TAG      0
-//#define HTTPD_USE_CUSTOM_FSDATA         1
+#define HTTPD_USE_CUSTOM_FSDATA         1
+// additional define for makefsdata app to properly include svg files:
+#define HTTPD_ADDITIONAL_CONTENT_TYPES {"svg", HTTP_CONTENT_TYPE("image/svg+xml")}
 
 /*
    ----------------------------------------

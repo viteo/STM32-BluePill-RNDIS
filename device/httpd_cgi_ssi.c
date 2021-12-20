@@ -14,7 +14,7 @@ const char IsChecked[] = "checked";
 
 const char *SSI_TAGS[] =
 {
-		"led",	// 0
+		"IsLED",	// 0
 };
 
 uint16_t SSI_Handler(int iIndex, char *pcInsert, int iInsertLen)
@@ -24,7 +24,7 @@ uint16_t SSI_Handler(int iIndex, char *pcInsert, int iInsertLen)
 	//iIndex of element in SSI_TAGS array
 	{
 	case 0: // is LED on
-		if(GPIO_ReadInputDataBit(GPIOC, PIN_LED))
+		if(!GPIO_ReadInputDataBit(GPIOC, PIN_LED))
 			strcpy(pcInsert, IsChecked);
 		break;
 	default:
@@ -47,7 +47,7 @@ const char* CGI_LEDS_Handler(int iIndex, int iNumParams, char *pcParam[], char *
 	if (iIndex == 0)
 	{
 		/* All leds off */
-		GPIO_ResetBits(GPIOC, PIN_LED);
+		GPIO_SetBits(GPIOC, PIN_LED);
 
 		/* Check cgi parameter : example GET /leds.cgi?led=1&led=2 */
 		for (i = 0; i < iNumParams; i++)
@@ -57,12 +57,12 @@ const char* CGI_LEDS_Handler(int iIndex, int iNumParams, char *pcParam[], char *
 			{
 				/* switch led1 ON if 1 */
 				if (strcmp(pcValue[i], "1") == 0)
-					GPIO_SetBits(GPIOC, PIN_LED);
+					GPIO_ResetBits(GPIOC, PIN_LED);
 			}
 		}
 	}
 	/* uri to send after cgi call*/
-	return "/status.shtml";
+	return "/index.shtml";
 }
 
 /* CGI call table */
