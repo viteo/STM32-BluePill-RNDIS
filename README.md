@@ -1,17 +1,18 @@
-STM32 BluePill Template project
+STM32 BluePill (F103) RNDIS device with LwIP
 ===
-STM32 [BluePill](https://stm32-base.org/boards/STM32F103C8T6-Blue-Pill.html) template project for [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html) with Standard Peripherial Library ([SPL](https://www.st.com/en/embedded-software/stm32-standard-peripheral-libraries.html)) v3.6.1.
+BluePill connected via USB to the host machine discovers as RNDIS device and allows to control it's parameters via browser. Based on LwIP stack, includes DHCP and DNS server.
 
-How to use
+Usage
 ---
-Install STM32CubeIDE
+Addresses defined in `device/device.h` file. By default it is `192.168.7.1`. The DHCP server should automatically assign connection. Type in your browser [http://192.168.7.1](http://192.168.7.1) to get access to the BluePill's `index.html`.
 
-    File -> Open Project from File System... -> Directory -> Finish
+The DNS server also gives you option to get access to BluePill with readable address: [http://run.stm](http://run.stm) or just [http://run](http://run)
 
-The project will appear in your Project Explorer. Rename it.
+On the index page use `LED PC13` checkbox to switch the LED on BluePill board.
 
-    Right Click -> Rename... -> Update references ✓ -> OK
+![BluePill](/fs/img/BluePill.svg)
 
-The .ioc file
+References
 ---
-The .ioc file added for reference where you might describe pinout, peripherials, timings, interrupts, etc. But just for reference. Do not use 'Generate Code' button. If you want to hide 'Code-generation needed' notification, delete ```isbadioc=true``` string from file or change it to false.
+* [LwIP](https://savannah.nongnu.org/projects/lwip/) included as [submodule](https://git.savannah.nongnu.org/git/lwip.git)
+* [lrndis](https://github.com/fetisov/lrndis) by Fetisov Sergey
