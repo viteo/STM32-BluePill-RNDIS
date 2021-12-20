@@ -105,7 +105,6 @@ void EP3_OUT_Callback(void)
 	{
 		rndis_received = 0;
 	}
-//	DCD_EP_PrepareRx(pdev, RNDIS_DATA_OUT_EP, (uint8_t*) usb_rx_buffer, RNDIS_DATA_OUT_SZ);
 	SetEPRxCount(CDC_DAT_EP_OUT_IDX, CDC_DATA_SIZE);
 	SetEPRxStatus(CDC_DAT_EP_OUT_IDX, EP_RX_VALID);
 }

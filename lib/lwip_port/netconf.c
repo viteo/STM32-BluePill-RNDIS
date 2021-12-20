@@ -11,7 +11,7 @@
 #include "lwip/init.h"
 #include "netif/ethernet.h"
 
-struct netif rndis_netif;
+struct netif rndis_netif; //network interface
 const ip_addr_t ipaddr  = IPADDR4_INIT_BYTES(IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
 const ip_addr_t netmask = IPADDR4_INIT_BYTES(NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
 const ip_addr_t gateway = IPADDR4_INIT_BYTES(GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
@@ -19,16 +19,24 @@ const ip_addr_t gateway = IPADDR4_INIT_BYTES(GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_AD
 #include "dhserver.h"
 static dhcp_entry_t entries[] =
 {
-    /* mac    ip address                           subnet mask                        lease time */
-    { {0}, IPADDR4_INIT_BYTES(192, 168, 7, 2), IPADDR4_INIT_BYTES(255, 255, 255, 0), 24 * 60 * 60 },
-    { {0}, IPADDR4_INIT_BYTES(192, 168, 7, 3), IPADDR4_INIT_BYTES(255, 255, 255, 0), 24 * 60 * 60 },
-    { {0}, IPADDR4_INIT_BYTES(192, 168, 7, 4), IPADDR4_INIT_BYTES(255, 255, 255, 0), 24 * 60 * 60 }
+    {
+    		{0},
+			IPADDR4_INIT_BYTES(IP_ADDR0, IP_ADDR1, IP_ADDR2, DHCP_ADDR_1),
+			IPADDR4_INIT_BYTES(NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3),
+			24 * 60 * 60
+    },
+    {
+    		{0},
+			IPADDR4_INIT_BYTES(IP_ADDR0, IP_ADDR1, IP_ADDR2, DHCP_ADDR_2),
+			IPADDR4_INIT_BYTES(NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3),
+			24 * 60 * 60
+    },
 };
 
 static dhcp_config_t dhcp_config =
 {
 	&ipaddr,              /* server address */
-	67,                   /* port */
+	PORT_DHCP,            /* port */
     &ipaddr,              /* dns server */
     "stm",                /* dns suffix */
     sizeof(entries) / sizeof(entries[0]),       /* entry count */
@@ -65,7 +73,7 @@ void LwIP_Init(void)
 
     while (dhserv_init(&dhcp_config)) ;
 
-    while (dnserv_init(&ipaddr, 53, dns_query_proc)) ;
+    while (dnserv_init(&ipaddr, PORT_DNS, dns_query_proc)) ;
 }
 
 /**

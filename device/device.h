@@ -18,6 +18,10 @@
 #define IP_ADDR2   7
 #define IP_ADDR3   1
 
+/*DHCP Client addresses: IP_ADDR0.IP_ADDR1.IP_ADDR2.DHCP_ADDR_x*/
+#define DHCP_ADDR_1     2
+#define DHCP_ADDR_2     3
+
 /*NETMASK*/
 #define NETMASK_ADDR0   255
 #define NETMASK_ADDR1   255

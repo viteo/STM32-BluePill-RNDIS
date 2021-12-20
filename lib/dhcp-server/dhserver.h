@@ -39,6 +39,8 @@
 #include "lwip/udp.h"
 #include "netif/etharp.h"
 
+#define PORT_DHCP 67
+
 typedef struct dhcp_entry
 {
 	uint8_t  mac[6];
